@@ -1,0 +1,11 @@
+memory_regions:
+  - name: FLASH
+    origin: 0x08000000
+    length: 0x20000
+    kind: flash
+    attrs: rx
+  - name: SRAM
+    origin: 0x20000000
+    length: 0x5000
+    kind: ram
+    attrs: rw

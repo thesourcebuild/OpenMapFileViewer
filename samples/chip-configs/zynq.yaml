@@ -1,0 +1,18 @@
+# Schema C: regions list (CMSIS/generic style)
+# Uses 'base' or 'origin', 'size' or 'length', 'kind' or 'type'
+regions:
+  - name: ps7_ddr_0
+    base: 0x00100000
+    size: 0x1FE00000
+    type: ram
+    attrs: rw
+  - name: ps7_ram_0
+    base: 0x00000000
+    size: 0x30000
+    type: ram
+    attrs: rw
+  - name: ps7_ram_1
+    base: 0xFFFF0000
+    size: 0xFE00
+    type: ram
+    attrs: rw

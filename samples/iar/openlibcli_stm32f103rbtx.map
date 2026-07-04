@@ -1,0 +1,765 @@
+###############################################################################
+#
+# IAR ELF Linker V9.70.4.588/W64 for ARM                  23/Jun/2026  23:46:28
+# Copyright 2007-2026 IAR Systems AB.
+#
+#    Output file  =
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Exe\OpenLibCLI.out
+#    Map file     =
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\List\OpenLibCLI.map
+#    Command line =
+#        -f
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Exe\OpenLibCLI.out.rsp
+#        (I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\OpenLibCLI_17672967797026343405.dir\cli.o
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\utils_15222801219514222262.dir\cli_args_parse.o
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\Core_13247989168731456611.dir\cli_demo_setup.o
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\Core_13247989168731456611.dir\cli_transport_serial.o
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\Core_13247989168731456611.dir\main.o
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\EWARM_18443280873093131863.dir\startup_stm32f103xb.o
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\STM32F1xx_HAL_Driver_9701002599162248031.dir\stm32f1xx_hal.o
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\STM32F1xx_HAL_Driver_9701002599162248031.dir\stm32f1xx_hal_cortex.o
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\STM32F1xx_HAL_Driver_9701002599162248031.dir\stm32f1xx_hal_dma.o
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\STM32F1xx_HAL_Driver_9701002599162248031.dir\stm32f1xx_hal_exti.o
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\STM32F1xx_HAL_Driver_9701002599162248031.dir\stm32f1xx_hal_flash.o
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\STM32F1xx_HAL_Driver_9701002599162248031.dir\stm32f1xx_hal_flash_ex.o
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\STM32F1xx_HAL_Driver_9701002599162248031.dir\stm32f1xx_hal_gpio.o
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\STM32F1xx_HAL_Driver_9701002599162248031.dir\stm32f1xx_hal_gpio_ex.o
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\Core_13247989168731456611.dir\stm32f1xx_hal_msp.o
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\STM32F1xx_HAL_Driver_9701002599162248031.dir\stm32f1xx_hal_pwr.o
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\STM32F1xx_HAL_Driver_9701002599162248031.dir\stm32f1xx_hal_rcc.o
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\STM32F1xx_HAL_Driver_9701002599162248031.dir\stm32f1xx_hal_rcc_ex.o
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\STM32F1xx_HAL_Driver_9701002599162248031.dir\stm32f1xx_hal_uart.o
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\Core_13247989168731456611.dir\stm32f1xx_it.o
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\CMSIS_6603591812247902717.dir\system_stm32f1xx.o
+#        --no_out_extension -o
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Exe\OpenLibCLI.out
+#        --redirect _Printf=_PrintfFullNoMb --redirect _Scanf=_ScanfFullNoMb
+#        --map
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\List\OpenLibCLI.map
+#        --config
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM/stm32f103xb_flash.icf
+#        --semihosting --entry __iar_program_start --vfe --text_out locale
+#        --cpu=Cortex-M3 --fpu=None) --diagnostics_format=sarif_stdout
+#        --dependencies=n
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Exe\OpenLibCLI.out.iar_deps
+#        --dynamic_output
+#        I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Exe\OpenLibCLI.out.iar_dynout
+#
+###############################################################################
+
+*******************************************************************************
+*** RUNTIME MODEL ATTRIBUTES
+***
+
+CppFlavor       = *
+__CPP_Runtime   = 1
+__SystemLibrary = DLib
+__dlib_version  = 6
+
+
+*******************************************************************************
+*** HEAP SELECTION
+***
+
+The basic heap was selected because --advanced_heap
+was not specified and the application did not appear to
+be primarily optimized for speed.
+
+
+*******************************************************************************
+*** PLACEMENT SUMMARY
+***
+
+"A0":  place at address 0x800'0000 {  ro section .intvec };
+"P1":  place in [from 0x800'0000 to 0x801'ffff] {  ro };
+define block CSTACK with size = 4K, alignment = 8 { };
+define block HEAP with size = 512, alignment = 8 { };
+"P2":  place in [from 0x2000'0000 to 0x2000'4fff] {
+           rw,  block CSTACK,  block HEAP };
+initialize by copy {  rw };
+
+  Section            Kind         Address  Alignment    Size  Object
+  -------            ----         -------  ---------    ----  ------
+"A0":                                                   0xec
+  .intvec            ro code   0x800'0000          4    0xec  startup_stm32f103xb.o [3]
+                             - 0x800'00ec               0xec
+
+"P1":                                                 0x5f5e
+  .text              ro code   0x800'00ec          4  0x22a4  cli.o [4]
+  .text              ro code   0x800'2390          4    0x66  ABImemset.o [9]
+  .text              ro code   0x800'23f6          2    0x2a  copy_init3.o [9]
+  .text              ro code   0x800'2420          4    0xa6  ABImemcpy.o [9]
+  .text              ro code   0x800'24c6          2    0x1a  xsnprout.o [7]
+  .text              ro code   0x800'24e0          4    0x36  strlen.o [9]
+  .rodata            const     0x800'2516          2     0x2  stm32f1xx_hal_rcc.o [5]
+  .text              ro code   0x800'2518          4    0x3c  vsnprint.o [7]
+  .text              ro code   0x800'2554          2    0x14  tolower.o [7]
+  .text              ro code   0x800'2568          4    0x96  ABImemmove.o [9]
+  .rodata            const     0x800'25fe          2     0x2  xlocale_c.o [7]
+  .text              ro code   0x800'2600          4    0x12  strcmp.o [9]
+  .rodata            const     0x800'2612          2     0x2  xlocale_c.o [7]
+  .text              ro code   0x800'2614          4   0xece  xprintffull_nomb.o [7]
+  .rodata            const     0x800'34e2                0x1  xlocale_c.o [7]
+  .text              ro code   0x800'34e4          4    0x28  xlocale_c.o [7]
+  .text              ro code   0x800'350c          4    0x16  strchr.o [9]
+  .text              ro code   0x800'3524          4    0x40  xfail_s.o [7]
+  .text              ro code   0x800'3564          4    0x58  memchr.o [9]
+  .text              ro code   0x800'35bc          4    0x70  frexp.o [8]
+  .text              ro code   0x800'362c          4    0x34  DblCmpLe.o [8]
+  .text              ro code   0x800'3660          4    0x34  DblCmpGe.o [8]
+  .text              ro code   0x800'3694          4   0x13a  ldexp.o [8]
+  .text              ro code   0x800'37d0          4    0x36  DblToS32.o [8]
+  .text              ro code   0x800'3808          4    0x22  S32ToDbl.o [8]
+  .text              ro code   0x800'382c          4   0x24e  DblAddSub.o [8]
+  .text              ro code   0x800'3a7c          4   0x246  DblDiv.o [8]
+  .text              ro code   0x800'3cc4          4    0x22  DblToU32.o [8]
+  .text              ro code   0x800'3ce8          4    0x1c  U32ToDbl.o [8]
+  .text              ro code   0x800'3d04          4   0x1aa  DblMul.o [8]
+  .text              ro code   0x800'3eb0          4   0x230  I64DivMod.o [9]
+  .text              ro code   0x800'40e0          2     0x6  abort.o [7]
+  .text              ro code   0x800'40e8          4    0x18  errno.o [7]
+  .text              ro code   0x800'4100          4     0x2  I64DivZer.o [9]
+  .text              ro code   0x800'4104          4    0x14  exit.o [10]
+  .text              ro code   0x800'4118          2     0x4  tp_nothreads.o [7]
+  .text              ro code   0x800'411c          4   0x608  stm32f1xx_hal_rcc.o [5]
+  .text              ro code   0x800'4724          4     0xc  stm32f1xx_hal.o [5]
+  .text              ro code   0x800'4730          4    0x4c  stm32f1xx_hal.o [5]
+  .text              ro code   0x800'477c          4   0x100  stm32f1xx_hal_cortex.o [5]
+  .text              ro code   0x800'487c          4   0x538  cli_demo_setup.o [2]
+  .text              ro code   0x800'4db4          4   0x204  stm32f1xx_hal_gpio.o [5]
+  .text              ro code   0x800'4fb8          4    0xec  cli_transport_serial.o [2]
+  .text              ro code   0x800'50a4          4    0x28  stm32f1xx_hal.o [5]
+  .text              ro code   0x800'50cc          4   0x1d2  cli_args_parse.o [6]
+  .text              ro code   0x800'52a0          4   0x3c0  stm32f1xx_hal_uart.o [5]
+  .text              ro code   0x800'5660          4    0xc0  stm32f1xx_hal_msp.o [2]
+  .rodata            const     0x800'5720          4    0xf8  cli_demo_setup.o [2]
+  .text              ro code   0x800'5818          4    0xdc  main.o [2]
+  .text              ro code   0x800'58f4          4    0x24  stm32f1xx_hal.o [5]
+  Initializer bytes  const     0x800'5918          4    0x8c  <for P2-1>
+  .rodata            const     0x800'59a4          4    0x44  cli_demo_setup.o [2]
+  .text              ro code   0x800'59e8          2    0x38  zero_init3.o [9]
+  .rodata            const     0x800'5a20          4    0x34  cli_demo_setup.o [2]
+  .rodata            const     0x800'5a54          4    0x30  cli.o [4]
+  .rodata            const     0x800'5a84          4    0x28  cli.o [4]
+  .rodata            const     0x800'5aac          4    0x28  cli_demo_setup.o [2]
+  .text              ro code   0x800'5ad4          4    0x28  data_init.o [9]
+  .rodata            const     0x800'5afc          4    0x24  cli.o [4]
+  .rodata            const     0x800'5b20          4    0x24  cli_demo_setup.o [2]
+  .rodata            const     0x800'5b44          4    0x24  cli_demo_setup.o [2]
+  .text              ro code   0x800'5b68          4    0x22  cmain.o [9]
+  .text              ro code   0x800'5b8a          2     0x4  low_level_init.o [7]
+  .text              ro code   0x800'5b8e          2     0x4  exit.o [7]
+  .text              ro code   0x800'5b94          4     0x4  cexit.o [9]
+  .text              ro code   0x800'5b98          4     0xa  cexit_2.o [9]
+  .iar.init_table    const     0x800'5ba4          4    0x24  - Linker created -
+  .rodata            const     0x800'5bc8          4    0x20  cli.o [4]
+  .rodata            const     0x800'5be8          4    0x20  cli_demo_setup.o [2]
+  .rodata            const     0x800'5c08          4    0x20  cli_demo_setup.o [2]
+  .text              ro code   0x800'5c28          4    0x1e  cstartup_M.o [9]
+  .rodata            const     0x800'5c48          4    0x1c  cli.o [4]
+  .rodata            const     0x800'5c64          4    0x1c  cli.o [4]
+  .rodata            const     0x800'5c80          4    0x1c  cli_demo_setup.o [2]
+  .rodata            const     0x800'5c9c          4    0x18  cli.o [4]
+  .rodata            const     0x800'5cb4          4    0x18  cli.o [4]
+  .rodata            const     0x800'5ccc          4    0x18  cli.o [4]
+  .rodata            const     0x800'5ce4          4    0x18  cli.o [4]
+  .rodata            const     0x800'5cfc          4    0x18  cli.o [4]
+  .rodata            const     0x800'5d14          4    0x18  cli_demo_setup.o [2]
+  .rodata            const     0x800'5d2c          4    0x18  cli_demo_setup.o [2]
+  .rodata            const     0x800'5d44          4    0x18  cli_demo_setup.o [2]
+  .rodata            const     0x800'5d5c          4    0x18  cli_demo_setup.o [2]
+  .text              ro code   0x800'5d74          4    0x18  stm32f1xx_hal.o [5]
+  .text              ro code   0x800'5d8c          2    0x18  stm32f1xx_it.o [2]
+  .rodata            const     0x800'5da4          4    0x14  cli.o [4]
+  .rodata            const     0x800'5db8          4    0x14  cli.o [4]
+  .rodata            const     0x800'5dcc          4    0x14  cli.o [4]
+  .rodata            const     0x800'5de0          4    0x14  cli.o [4]
+  .rodata            const     0x800'5df4          4    0x14  cli_demo_setup.o [2]
+  .rodata            const     0x800'5e08          4    0x14  cli_demo_setup.o [2]
+  .rodata            const     0x800'5e1c          4    0x14  cli_demo_setup.o [2]
+  .rodata            const     0x800'5e30          4    0x10  cli_demo_setup.o [2]
+  .rodata            const     0x800'5e40          4    0x10  cli_demo_setup.o [2]
+  .rodata            const     0x800'5e50          4    0x10  cli_demo_setup.o [2]
+  .rodata            const     0x800'5e60          4    0x10  cli_demo_setup.o [2]
+  .rodata            const     0x800'5e70          4    0x10  cli_demo_setup.o [2]
+  .rodata            const     0x800'5e80          4    0x10  cli_demo_setup.o [2]
+  .rodata            const     0x800'5e90          4    0x10  cli_demo_setup.o [2]
+  .rodata            const     0x800'5ea0          4    0x10  stm32f1xx_hal_rcc.o [5]
+  .rodata            const     0x800'5eb0          4    0x10  system_stm32f1xx.o [1]
+  .text              ro code   0x800'5ec0          4    0x10  startup_stm32f103xb.o [3]
+  .rodata            const     0x800'5ed0          4     0xc  cli.o [4]
+  .rodata            const     0x800'5edc          4     0xc  cli.o [4]
+  .rodata            const     0x800'5ee8          4     0xc  cli.o [4]
+  .rodata            const     0x800'5ef4          4     0xc  cli.o [4]
+  .rodata            const     0x800'5f00          4     0xc  cli_demo_setup.o [2]
+  .rodata            const     0x800'5f0c          4     0x8  cli.o [4]
+  .rodata            const     0x800'5f14          4     0x8  cli.o [4]
+  .rodata            const     0x800'5f1c          4     0x8  cli.o [4]
+  .rodata            const     0x800'5f24          4     0x8  cli_demo_setup.o [2]
+  .rodata            const     0x800'5f2c          4     0x8  cli_demo_setup.o [2]
+  .rodata            const     0x800'5f34          4     0x8  cli_demo_setup.o [2]
+  .rodata            const     0x800'5f3c          4     0x8  cli_demo_setup.o [2]
+  .rodata            const     0x800'5f44          4     0x8  cli_demo_setup.o [2]
+  .rodata            const     0x800'5f4c          4     0x8  cli_demo_setup.o [2]
+  .rodata            const     0x800'5f54          4     0x8  cli_demo_setup.o [2]
+  .rodata            const     0x800'5f5c          4     0x8  cli_demo_setup.o [2]
+  .rodata            const     0x800'5f64          4     0x8  cli_demo_setup.o [2]
+  .rodata            const     0x800'5f6c          4     0x8  cli_demo_setup.o [2]
+  .rodata            const     0x800'5f74          4     0x8  cli_demo_setup.o [2]
+  .rodata            const     0x800'5f7c          4     0x8  cli_demo_setup.o [2]
+  .rodata            const     0x800'5f84          4     0x8  cli_demo_setup.o [2]
+  .rodata            const     0x800'5f8c          4     0x8  cli_demo_setup.o [2]
+  .rodata            const     0x800'5f94          4     0x8  system_stm32f1xx.o [1]
+  .text              ro code   0x800'5f9c          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'5fa0          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'5fa4          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'5fa8          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'5fac          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'5fb0          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'5fb4          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'5fb8          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'5fbc          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'5fc0          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'5fc4          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'5fc8          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'5fcc          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'5fd0          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'5fd4          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'5fd8          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'5fdc          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'5fe0          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'5fe4          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'5fe8          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'5fec          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'5ff0          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'5ff4          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'5ff8          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'5ffc          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'6000          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'6004          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'6008          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'600c          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'6010          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'6014          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'6018          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'601c          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'6020          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'6024          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'6028          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'602c          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'6030          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'6034          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'6038          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'603c          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'6040          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'6044          2     0x4  startup_stm32f103xb.o [3]
+  .text              ro code   0x800'6048          4     0x2  system_stm32f1xx.o [1]
+  .rodata            const     0x800'604a                0x0  zero_init3.o [9]
+  .rodata            const     0x800'604a                0x0  copy_init3.o [9]
+                             - 0x800'604a             0x5f5e
+
+"P2", part 1 of 3:                                      0x8c
+  P2-1                        0x2000'0000          4    0x89  <Init block>
+    .data            inited   0x2000'0000          4     0x4  stm32f1xx_hal.o [5]
+    .data            inited   0x2000'0004          4     0x4  system_stm32f1xx.o [1]
+    .data            inited   0x2000'0008          4    0x38  xlocale_c.o [7]
+    .data            inited   0x2000'0040          4    0x48  xlocale_c.o [7]
+    .data            inited   0x2000'0088                0x1  stm32f1xx_hal.o [5]
+                            - 0x2000'0089               0x89
+
+"P2", part 2 of 3:                                     0xc74
+  .bss               zero     0x2000'008c          4   0x7d0  cli_demo_setup.o [2]
+  .bss               zero     0x2000'085c          4   0x43c  cli_demo_setup.o [2]
+  .bss               zero     0x2000'0c98          4    0x48  main.o [2]
+  .bss               zero     0x2000'0ce0          4     0xc  cli_demo_setup.o [2]
+  .bss               zero     0x2000'0cec          4     0x4  cli_demo_setup.o [2]
+  .bss               zero     0x2000'0cf0          4     0x4  stm32f1xx_hal.o [5]
+  .bss               zero     0x2000'0cf4          4     0x4  xfail_s.o [7]
+  .tbss              zero     0x2000'0cf8          4     0x4  errno.o [7]
+  .bss               zero     0x2000'0cfc                0x1  cli_transport_serial.o [2]
+  .bss               zero     0x2000'0cfd                0x1  cli_transport_serial.o [2]
+                            - 0x2000'0cfe              0xc72
+
+"P2", part 3 of 3:                                    0x1000
+  CSTACK                      0x2000'0d00          8  0x1000  <Block>
+    CSTACK           uninit   0x2000'0d00             0x1000  <Block tail>
+                            - 0x2000'1d00             0x1000
+
+Unused ranges:
+
+         From           To      Size
+         ----           --      ----
+   0x800'604a   0x801'ffff  0x1'9fb6
+  0x2000'1d00  0x2000'4fff    0x3300
+
+
+*******************************************************************************
+*** INIT TABLE
+***
+
+          Address      Size
+          -------      ----
+Zero (__iar_zero_init3)
+    1 destination range, total size 0xc72:
+          0x2000'008c  0xc72
+
+Copy (__iar_copy_init3)
+    1 source range, total size 0x8c (102% of destination):
+           0x800'5918   0x8c
+    1 destination range, total size 0x89:
+          0x2000'0000   0x89
+
+
+
+*******************************************************************************
+*** MODULE SUMMARY
+***
+
+    Module                  ro code  ro data  rw data
+    ------                  -------  -------  -------
+command line/config:
+    -------------------------------------------------
+    Total:
+
+I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\CMSIS_6603591812247902717.dir: [1]
+    system_stm32f1xx.o            2       28        4
+    -------------------------------------------------
+    Total:                        2       28        4
+
+I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\Core_13247989168731456611.dir: [2]
+    cli_demo_setup.o          1'336      964    3'100
+    cli_transport_serial.o      236                 2
+    main.o                      220                72
+    stm32f1xx_hal_msp.o         192
+    stm32f1xx_it.o               24
+    -------------------------------------------------
+    Total:                    2'008      964    3'174
+
+I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\EWARM_18443280873093131863.dir: [3]
+    startup_stm32f103xb.o       424
+    -------------------------------------------------
+    Total:                      424
+
+I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\OpenLibCLI_17672967797026343405.dir: [4]
+    cli.o                     8'868      484
+    -------------------------------------------------
+    Total:                    8'868      484
+
+I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\STM32F1xx_HAL_Driver_9701002599162248031.dir: [5]
+    stm32f1xx_hal.o             188        5        9
+    stm32f1xx_hal_cortex.o      256
+    stm32f1xx_hal_gpio.o        516
+    stm32f1xx_hal_rcc.o       1'544       18
+    stm32f1xx_hal_uart.o        960
+    -------------------------------------------------
+    Total:                    3'464       23        9
+
+I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\utils_15222801219514222262.dir: [6]
+    cli_args_parse.o            466
+    -------------------------------------------------
+    Total:                      466
+
+dl7M_tlf.a: [7]
+    abort.o                       6
+    errno.o                      24                 4
+    exit.o                        4
+    low_level_init.o              4
+    tolower.o                    20
+    tp_nothreads.o                4
+    vsnprint.o                   60
+    xfail_s.o                    64                 4
+    xlocale_c.o                  40      133      128
+    xprintffull_nomb.o        3'790
+    xsnprout.o                   26
+    -------------------------------------------------
+    Total:                    4'042      133      136
+
+m7M_tl.a: [8]
+    DblAddSub.o                 590
+    DblCmpGe.o                   52
+    DblCmpLe.o                   52
+    DblDiv.o                    582
+    DblMul.o                    426
+    DblToS32.o                   54
+    DblToU32.o                   34
+    S32ToDbl.o                   34
+    U32ToDbl.o                   28
+    frexp.o                     112
+    ldexp.o                     314
+    -------------------------------------------------
+    Total:                    2'278
+
+rt7M_tl.a: [9]
+    ABImemcpy.o                 166
+    ABImemmove.o                150
+    ABImemset.o                 102
+    I64DivMod.o                 560
+    I64DivZer.o                   2
+    cexit.o                       4
+    cexit_2.o                    10
+    cmain.o                      34
+    copy_init3.o                 42
+    cstartup_M.o                 30
+    data_init.o                  40
+    memchr.o                     88
+    strchr.o                     22
+    strcmp.o                     18
+    strlen.o                     54
+    zero_init3.o                 56
+    -------------------------------------------------
+    Total:                    1'378
+
+shb_l.a: [10]
+    exit.o                       20
+    -------------------------------------------------
+    Total:                       20
+
+    Gaps                         25        4
+    Linker created                        39    4'096
+-----------------------------------------------------
+    Grand Total:             22'975    1'675    7'419
+
+
+*******************************************************************************
+*** ENTRY LIST
+***
+
+Entry                       Address   Size  Type      Object
+-----                       -------   ----  ----      ------
+.iar.init_table$$Base    0x800'5ba4          --   Gb  - Linker created -
+.iar.init_table$$Limit   0x800'5bc8          --   Gb  - Linker created -
+?main                    0x800'5b69         Code  Gb  cmain.o [9]
+ADC1_2_IRQHandler        0x800'5fe5         Code  Wk  startup_stm32f103xb.o [3]
+AHBPrescTable            0x800'5eb0   0x10  Data  Gb  system_stm32f1xx.o [1]
+APBPrescTable            0x800'5f94    0x8  Data  Gb  system_stm32f1xx.o [1]
+BusFault_Handler         0x800'5d93    0x2  Code  Gb  stm32f1xx_it.o [2]
+CAN1_RX1_IRQHandler      0x800'5ff1         Code  Wk  startup_stm32f103xb.o [3]
+CAN1_SCE_IRQHandler      0x800'5ff5         Code  Wk  startup_stm32f103xb.o [3]
+CSTACK$$Base            0x2000'0d00          --   Gb  - Linker created -
+CSTACK$$Limit           0x2000'1d00          --   Gb  - Linker created -
+DMA1_Channel1_IRQHandler
+                         0x800'5fc9         Code  Wk  startup_stm32f103xb.o [3]
+DMA1_Channel2_IRQHandler
+                         0x800'5fcd         Code  Wk  startup_stm32f103xb.o [3]
+DMA1_Channel3_IRQHandler
+                         0x800'5fd1         Code  Wk  startup_stm32f103xb.o [3]
+DMA1_Channel4_IRQHandler
+                         0x800'5fd5         Code  Wk  startup_stm32f103xb.o [3]
+DMA1_Channel5_IRQHandler
+                         0x800'5fd9         Code  Wk  startup_stm32f103xb.o [3]
+DMA1_Channel6_IRQHandler
+                         0x800'5fdd         Code  Wk  startup_stm32f103xb.o [3]
+DMA1_Channel7_IRQHandler
+                         0x800'5fe1         Code  Wk  startup_stm32f103xb.o [3]
+DebugMon_Handler         0x800'5d99    0x2  Code  Gb  stm32f1xx_it.o [2]
+EXTI0_IRQHandler         0x800'5fb5         Code  Wk  startup_stm32f103xb.o [3]
+EXTI15_10_IRQHandler     0x800'603d         Code  Wk  startup_stm32f103xb.o [3]
+EXTI1_IRQHandler         0x800'5fb9         Code  Wk  startup_stm32f103xb.o [3]
+EXTI2_IRQHandler         0x800'5fbd         Code  Wk  startup_stm32f103xb.o [3]
+EXTI3_IRQHandler         0x800'5fc1         Code  Wk  startup_stm32f103xb.o [3]
+EXTI4_IRQHandler         0x800'5fc5         Code  Wk  startup_stm32f103xb.o [3]
+EXTI9_5_IRQHandler       0x800'5ff9         Code  Wk  startup_stm32f103xb.o [3]
+Error_Handler            0x800'58f1    0x4  Code  Gb  main.o [2]
+FLASH_IRQHandler         0x800'5fad         Code  Wk  startup_stm32f103xb.o [3]
+HAL_Delay                0x800'50a5   0x28  Code  Wk  stm32f1xx_hal.o [5]
+HAL_GPIO_Init            0x800'4db5  0x1ae  Code  Gb  stm32f1xx_hal_gpio.o [5]
+HAL_GPIO_WritePin        0x800'4f63   0x14  Code  Gb  stm32f1xx_hal_gpio.o [5]
+HAL_GetTick              0x800'4725    0xc  Code  Wk  stm32f1xx_hal.o [5]
+HAL_IncTick              0x800'5d75   0x18  Code  Wk  stm32f1xx_hal.o [5]
+HAL_Init                 0x800'58f5   0x20  Code  Gb  stm32f1xx_hal.o [5]
+HAL_InitTick             0x800'4731   0x4c  Code  Wk  stm32f1xx_hal.o [5]
+HAL_MspInit              0x800'5661   0x3c  Code  Gb  stm32f1xx_hal_msp.o [2]
+HAL_NVIC_SetPriority     0x800'4837   0x22  Code  Gb  stm32f1xx_hal_cortex.o [5]
+HAL_NVIC_SetPriorityGrouping
+                         0x800'482f    0x8  Code  Gb  stm32f1xx_hal_cortex.o [5]
+HAL_RCC_ClockConfig      0x800'44f5  0x146  Code  Gb  stm32f1xx_hal_rcc.o [5]
+HAL_RCC_GetHCLKFreq      0x800'4687    0x6  Code  Gb  stm32f1xx_hal_rcc.o [5]
+HAL_RCC_GetPCLK1Freq     0x800'468d   0x16  Code  Gb  stm32f1xx_hal_rcc.o [5]
+HAL_RCC_GetPCLK2Freq     0x800'46a3   0x16  Code  Gb  stm32f1xx_hal_rcc.o [5]
+HAL_RCC_GetSysClockFreq
+                         0x800'463b   0x4c  Code  Gb  stm32f1xx_hal_rcc.o [5]
+HAL_RCC_GetSysClockFreq::aPLLMULFactorTable
+                         0x800'5ea0   0x10  Data  Lc  stm32f1xx_hal_rcc.o [5]
+HAL_RCC_GetSysClockFreq::aPredivFactorTable
+                         0x800'2516    0x2  Data  Lc  stm32f1xx_hal_rcc.o [5]
+HAL_RCC_OscConfig        0x800'411d  0x3d8  Code  Gb  stm32f1xx_hal_rcc.o [5]
+HAL_SYSTICK_Config       0x800'4859    0x8  Code  Gb  stm32f1xx_hal_cortex.o [5]
+HAL_UART_Init            0x800'52a1   0x7a  Code  Gb  stm32f1xx_hal_uart.o [5]
+HAL_UART_MspInit         0x800'569d   0x6e  Code  Gb  stm32f1xx_hal_msp.o [2]
+HAL_UART_Receive         0x800'53db   0xc8  Code  Gb  stm32f1xx_hal_uart.o [5]
+HAL_UART_Transmit        0x800'531b   0xc0  Code  Gb  stm32f1xx_hal_uart.o [5]
+HardFault_Handler        0x800'5d8f    0x2  Code  Gb  stm32f1xx_it.o [2]
+I2C1_ER_IRQHandler       0x800'601d         Code  Wk  startup_stm32f103xb.o [3]
+I2C1_EV_IRQHandler       0x800'6019         Code  Wk  startup_stm32f103xb.o [3]
+I2C2_ER_IRQHandler       0x800'6025         Code  Wk  startup_stm32f103xb.o [3]
+I2C2_EV_IRQHandler       0x800'6021         Code  Wk  startup_stm32f103xb.o [3]
+MX_GPIO_Init             0x800'58c9   0x1a  Code  Lc  main.o [2]
+MX_USART2_UART_Init      0x800'5895   0x34  Code  Lc  main.o [2]
+MemManage_Handler        0x800'5d91    0x2  Code  Gb  stm32f1xx_it.o [2]
+NMI_Handler              0x800'5d8d    0x2  Code  Gb  stm32f1xx_it.o [2]
+NVIC_EncodePriority      0x800'47c5   0x3c  Code  Lc  stm32f1xx_hal_cortex.o [5]
+PVD_IRQHandler           0x800'5fa1         Code  Wk  startup_stm32f103xb.o [3]
+PendSV_Handler           0x800'5d9b    0x2  Code  Gb  stm32f1xx_it.o [2]
+RCC_Delay                0x800'46b9   0x24  Code  Lc  stm32f1xx_hal_rcc.o [5]
+RCC_IRQHandler           0x800'5fb1         Code  Wk  startup_stm32f103xb.o [3]
+RTC_Alarm_IRQHandler     0x800'6041         Code  Wk  startup_stm32f103xb.o [3]
+RTC_IRQHandler           0x800'5fa9         Code  Wk  startup_stm32f103xb.o [3]
+Region$$Table$$Base      0x800'5ba4          --   Gb  - Linker created -
+Region$$Table$$Limit     0x800'5bc8          --   Gb  - Linker created -
+Reset_Handler            0x800'5ec1         Code  Wk  startup_stm32f103xb.o [3]
+SPI1_IRQHandler          0x800'6029         Code  Wk  startup_stm32f103xb.o [3]
+SPI2_IRQHandler          0x800'602d         Code  Wk  startup_stm32f103xb.o [3]
+SVC_Handler              0x800'5d97    0x2  Code  Gb  stm32f1xx_it.o [2]
+SysTick_Config           0x800'4801   0x2e  Code  Lc  stm32f1xx_hal_cortex.o [5]
+SysTick_Handler          0x800'5d9d    0x8  Code  Gb  stm32f1xx_it.o [2]
+SystemClock_Config       0x800'5837   0x5e  Code  Gb  main.o [2]
+SystemCoreClock         0x2000'0004    0x4  Data  Gb  system_stm32f1xx.o [1]
+SystemInit               0x800'6049    0x2  Code  Gb  system_stm32f1xx.o [1]
+TAMPER_IRQHandler        0x800'5fa5         Code  Wk  startup_stm32f103xb.o [3]
+TIM1_BRK_IRQHandler      0x800'5ffd         Code  Wk  startup_stm32f103xb.o [3]
+TIM1_CC_IRQHandler       0x800'6009         Code  Wk  startup_stm32f103xb.o [3]
+TIM1_TRG_COM_IRQHandler
+                         0x800'6005         Code  Wk  startup_stm32f103xb.o [3]
+TIM1_UP_IRQHandler       0x800'6001         Code  Wk  startup_stm32f103xb.o [3]
+TIM2_IRQHandler          0x800'600d         Code  Wk  startup_stm32f103xb.o [3]
+TIM3_IRQHandler          0x800'6011         Code  Wk  startup_stm32f103xb.o [3]
+TIM4_IRQHandler          0x800'6015         Code  Wk  startup_stm32f103xb.o [3]
+UART_EndRxTransfer       0x800'5527   0x60  Code  Lc  stm32f1xx_hal_uart.o [5]
+UART_SetConfig           0x800'5587   0xd0  Code  Lc  stm32f1xx_hal_uart.o [5]
+UART_WaitOnFlagUntilTimeout
+                         0x800'54a3   0x84  Code  Lc  stm32f1xx_hal_uart.o [5]
+USART1_IRQHandler        0x800'6031         Code  Wk  startup_stm32f103xb.o [3]
+USART2_IRQHandler        0x800'6035         Code  Wk  startup_stm32f103xb.o [3]
+USART3_IRQHandler        0x800'6039         Code  Wk  startup_stm32f103xb.o [3]
+USBWakeUp_IRQHandler     0x800'6045         Code  Wk  startup_stm32f103xb.o [3]
+USB_HP_CAN1_TX_IRQHandler
+                         0x800'5fe9         Code  Wk  startup_stm32f103xb.o [3]
+USB_LP_CAN1_RX0_IRQHandler
+                         0x800'5fed         Code  Wk  startup_stm32f103xb.o [3]
+UsageFault_Handler       0x800'5d95    0x2  Code  Gb  stm32f1xx_it.o [2]
+WWDG_IRQHandler          0x800'5f9d         Code  Wk  startup_stm32f103xb.o [3]
+_LC                      0x800'2615    0x6  Code  Lc  xprintffull_nomb.o [7]
+_LitobFullNoMb           0x800'3301  0x114  Code  Lc  xprintffull_nomb.o [7]
+_LocaleC_isupper         0x800'34e5    0x2  Code  Gb  xlocale_c.o [7]
+_LocaleC_tolower         0x800'34f1    0xc  Code  Gb  xlocale_c.o [7]
+_Locale_lconv           0x2000'0008   0x38  Data  Lc  xlocale_c.o [7]
+_PrintfFullNoMb          0x800'261b  0xcb8  Code  Gb  xprintffull_nomb.o [7]
+_PutcharsFullNoMb        0x800'346d   0x2e  Code  Lc  xprintffull_nomb.o [7]
+_SNProut                 0x800'24c7   0x1a  Code  Gb  xsnprout.o [7]
+__NVIC_GetPriorityGrouping
+                         0x800'4797    0xa  Code  Lc  stm32f1xx_hal_cortex.o [5]
+__NVIC_SetPriority       0x800'47a1   0x24  Code  Lc  stm32f1xx_hal_cortex.o [5]
+__NVIC_SetPriorityGrouping
+                         0x800'477d   0x1a  Code  Lc  stm32f1xx_hal_cortex.o [5]
+__NVIC_SystemReset       0x800'487d   0x1e  Code  Lc  cli_demo_setup.o [2]
+__aeabi_cdcmple          0x800'362d         Code  Gb  DblCmpLe.o [8]
+__aeabi_cdrcmple         0x800'3661         Code  Gb  DblCmpGe.o [8]
+__aeabi_d2iz             0x800'37d1         Code  Gb  DblToS32.o [8]
+__aeabi_d2uiz            0x800'3cc5         Code  Gb  DblToU32.o [8]
+__aeabi_ddiv             0x800'3a7d         Code  Gb  DblDiv.o [8]
+__aeabi_dmul             0x800'3d05         Code  Gb  DblMul.o [8]
+__aeabi_dsub             0x800'3999         Code  Gb  DblAddSub.o [8]
+__aeabi_i2d              0x800'3809         Code  Gb  S32ToDbl.o [8]
+__aeabi_ldiv0            0x800'4101         Code  Gb  I64DivZer.o [9]
+__aeabi_memcpy           0x800'2421         Code  Gb  ABImemcpy.o [9]
+__aeabi_memcpy4          0x800'2441         Code  Gb  ABImemcpy.o [9]
+__aeabi_memcpy8          0x800'2441         Code  Gb  ABImemcpy.o [9]
+__aeabi_memmove          0x800'2569         Code  Gb  ABImemmove.o [9]
+__aeabi_memmove4         0x800'2569         Code  Gb  ABImemmove.o [9]
+__aeabi_memmove8         0x800'2569         Code  Gb  ABImemmove.o [9]
+__aeabi_memset           0x800'2391         Code  Gb  ABImemset.o [9]
+__aeabi_ui2d             0x800'3ce9         Code  Gb  U32ToDbl.o [8]
+__aeabi_uldivmod         0x800'3eb1         Code  Gb  I64DivMod.o [9]
+__cmain                  0x800'5b69         Code  Gb  cmain.o [9]
+__exit                   0x800'4105   0x14  Code  Gb  exit.o [10]
+__iar_Errno             0x2000'0cf8    0x4  Tls   Gb  errno.o [7]
+__iar_Fail_s             0x800'3525   0x1c  Code  Gb  xfail_s.o [7]
+__iar_Memchr             0x800'3565         Code  Gb  memchr.o [9]
+__iar_Memset             0x800'2391         Code  Gb  ABImemset.o [9]
+__iar_Memset_word        0x800'2399         Code  Gb  ABImemset.o [9]
+__iar_Strchr             0x800'350d         Code  Gb  strchr.o [9]
+__iar_copy_init3         0x800'23f7   0x2a  Code  Gb  copy_init3.o [9]
+__iar_data_init3         0x800'5ad5   0x28  Code  Gb  data_init.o [9]
+__iar_errno_set_ERANGE   0x800'40e9    0xc  Code  Gb  errno.o [7]
+__iar_frexp              0x800'35c9         Code  Gb  frexp.o [8]
+__iar_frexp64            0x800'35bd         Code  Gb  frexp.o [8]
+__iar_frexpl             0x800'35c9         Code  Gb  frexp.o [8]
+__iar_globLocale        0x2000'0040   0x48  Data  Lc  xlocale_c.o [7]
+__iar_global_Locale      0x800'34fd    0x4  Code  Gb  xlocale_c.o [7]
+__iar_ldexp64            0x800'3695         Code  Gb  ldexp.o [8]
+__iar_nothread_read_tp   0x800'4119    0x4  Code  Gb  tp_nothreads.o [7]
+__iar_program_start      0x800'5c29         Code  Gb  cstartup_M.o [9]
+__iar_scalbln64          0x800'3695         Code  Gb  ldexp.o [8]
+__iar_scalbn64           0x800'3695         Code  Gb  ldexp.o [8]
+__iar_zero_init3         0x800'59e9   0x38  Code  Gb  zero_init3.o [9]
+__low_level_init         0x800'5b8b    0x4  Code  Gb  low_level_init.o [7]
+__vector_table           0x800'0000         Data  Gb  startup_stm32f103xb.o [3]
+_call_main               0x800'5b75         Code  Gb  cmain.o [9]
+_exit                    0x800'5b95         Code  Gb  cexit.o [9]
+_exit_2                  0x800'5b99         Code  Gb  cexit_2.o [9]
+abort                    0x800'40e1    0x6  Code  Gb  abort.o [7]
+cli_add_command          0x800'07b5   0xd6  Code  Gb  cli.o [4]
+cli_add_user             0x800'074f   0x5c  Code  Gb  cli.o [4]
+cli_auth_backspace       0x800'2163   0x42  Code  Lc  cli.o [4]
+cli_auth_clear_input     0x800'21e1   0x2a  Code  Lc  cli.o [4]
+cli_auth_handle          0x800'2051   0xca  Code  Lc  cli.o [4]
+cli_auth_input_limit     0x800'1f5d   0x2c  Code  Lc  cli.o [4]
+cli_auth_insert_char     0x800'220b   0x5e  Code  Lc  cli.o [4]
+cli_auth_lockout_expired
+                         0x800'1dcd   0x44  Code  Lc  cli.o [4]
+cli_auth_prompt_username
+                         0x800'1da7   0x22  Code  Lc  cli.o [4]
+cli_auth_reset_work      0x800'1d99    0xe  Code  Lc  cli.o [4]
+cli_auth_secret_input    0x800'1f3f   0x1e  Code  Lc  cli.o [4]
+cli_auth_submit_line     0x800'1f89   0xc8  Code  Lc  cli.o [4]
+cli_auth_verify          0x800'1e3f  0x100  Code  Lc  cli.o [4]
+cli_backspace            0x800'0e0f   0x26  Code  Lc  cli.o [4]
+cli_case_prefix_match    0x800'0a69   0x38  Code  Lc  cli.o [4]
+cli_check_idle_timeout   0x800'06b9   0x96  Code  Gb  cli.o [4]
+cli_clear_input          0x800'0ec5   0x20  Code  Lc  cli.o [4]
+cli_cmd_builtin_clear_screen
+                         0x800'02c5   0x26  Code  Gb  cli.o [4]
+cli_cmd_builtin_exit     0x800'00ed   0xc2  Code  Gb  cli.o [4]
+cli_cmd_builtin_help     0x800'0225   0xa0  Code  Gb  cli.o [4]
+cli_cmd_builtin_history
+                         0x800'01b1   0x74  Code  Gb  cli.o [4]
+cli_cmd_has_children     0x800'14f9   0x3a  Code  Lc  cli.o [4]
+cli_context_current      0x800'1533   0x16  Code  Lc  cli.o [4]
+cli_context_set_to_node
+                         0x800'1549    0x4  Code  Lc  cli.o [4]
+cli_delete_char          0x800'0d7b   0x94  Code  Lc  cli.o [4]
+cli_demo_poll            0x800'49b3   0x12  Code  Gb  cli_demo_setup.o [2]
+cli_demo_setup           0x800'489b  0x118  Code  Gb  cli_demo_setup.o [2]
+cli_demo_shutdown        0x800'49c5    0xa  Code  Gb  cli_demo_setup.o [2]
+cli_done                 0x800'05f5   0x1c  Code  Gb  cli.o [4]
+cli_error_p              0x800'0991   0x88  Code  Gb  cli.o [4]
+cli_execute              0x800'1cdd   0xbc  Code  Lc  cli.o [4]
+cli_execute_command      0x800'1b81  0x158  Code  Lc  cli.o [4]
+cli_feed                 0x800'1951  0x22a  Code  Lc  cli.o [4]
+cli_flush                0x800'0add   0x12  Code  Lc  cli.o [4]
+cli_foreach_match        0x800'131d   0x98  Code  Lc  cli.o [4]
+cli_handle_idle_timeout
+                         0x800'0b0f   0x74  Code  Lc  cli.o [4]
+cli_has_any_match        0x800'147f   0x7a  Code  Lc  cli.o [4]
+cli_history_add          0x800'0fdb  0x12c  Code  Lc  cli.o [4]
+cli_history_capture_edited_preview
+                         0x800'0bc1   0x1e  Code  Lc  cli.o [4]
+cli_history_clear_displayed_input
+                         0x800'1121   0x56  Code  Lc  cli.o [4]
+cli_history_index        0x800'1107   0x1a  Code  Lc  cli.o [4]
+cli_history_navigate     0x800'1177   0xca  Code  Lc  cli.o [4]
+cli_init                 0x800'04d9  0x10e  Code  Gb  cli.o [4]
+cli_insert_char          0x800'0cd5   0xa6  Code  Lc  cli.o [4]
+cli_kill_line            0x800'0e35   0x4e  Code  Lc  cli.o [4]
+cli_kill_word            0x800'0e83   0x42  Code  Lc  cli.o [4]
+cli_menu_context_parent
+                         0x800'154d   0x6c  Code  Lc  cli.o [4]
+cli_move_cursor          0x800'0c81   0x54  Code  Lc  cli.o [4]
+cli_move_cursor_delta    0x800'0c41   0x34  Code  Lc  cli.o [4]
+cli_move_cursor_end      0x800'0c75    0xc  Code  Lc  cli.o [4]
+cli_print_help_cb        0x800'129d   0x72  Code  Lc  cli.o [4]
+cli_print_process_stream
+                         0x800'0b83   0x38  Code  Lc  cli.o [4]
+cli_println_p            0x800'090d   0x74  Code  Gb  cli.o [4]
+cli_process_escape       0x800'2269   0x76  Code  Lc  cli.o [4]
+cli_raw_write            0x800'0aa1   0x14  Code  Lc  cli.o [4]
+cli_redraw_line          0x800'0bdf   0x4e  Code  Lc  cli.o [4]
+cli_register_commands    0x800'4b7d  0x12c  Code  Lc  cli_demo_setup.o [2]
+cli_require_authorization
+                         0x800'07ab    0xa  Code  Gb  cli.o [4]
+cli_reset_input          0x800'211b   0x18  Code  Lc  cli.o [4]
+cli_resolve_one          0x800'13b5   0xca  Code  Lc  cli.o [4]
+cli_restart_session      0x800'0611   0x5e  Code  Gb  cli.o [4]
+cli_session_engine       0x800'0307  0x1ce  Code  Gb  cli.o [4]
+cli_set_banner           0x800'066f   0x12  Code  Gb  cli.o [4]
+cli_set_enable_secret    0x800'08d9   0x18  Code  Gb  cli.o [4]
+cli_set_exit_root_policy
+                         0x800'08f1    0xa  Code  Gb  cli.o [4]
+cli_set_idle_timeout     0x800'06a9   0x10  Code  Gb  cli.o [4]
+cli_set_mode             0x800'088d   0x2a  Code  Gb  cli.o [4]
+cli_set_mode_name        0x800'068b   0x1e  Code  Gb  cli.o [4]
+cli_set_privilege        0x800'08b7   0x22  Code  Gb  cli.o [4]
+cli_set_quit_policy      0x800'08fb    0xa  Code  Gb  cli.o [4]
+cli_set_userdata         0x800'0681    0xa  Code  Gb  cli.o [4]
+cli_show_help            0x800'17f9  0x154  Code  Lc  cli.o [4]
+cli_show_prompt          0x800'0ee5   0xf6  Code  Lc  cli.o [4]
+cli_snprintf             0x800'0a29    0xe  Code  Gb  cli.o [4]
+cli_start                0x800'02f5   0x12  Code  Gb  cli.o [4]
+cli_state_is_auth_input
+                         0x800'1e11   0x2e  Code  Lc  cli.o [4]
+cli_strlcpy              0x800'0a3f   0x2a  Code  Lc  cli.o [4]
+cli_submit_line          0x800'2133   0x30  Code  Lc  cli.o [4]
+cli_tab_complete         0x800'15b9  0x236  Code  Lc  cli.o [4]
+cli_tokenize             0x800'1241   0x5c  Code  Lc  cli.o [4]
+cli_touch_activity_internal
+                         0x800'0aef   0x20  Code  Lc  cli.o [4]
+cli_transport_serial_init
+                         0x800'4fb9   0x3a  Code  Gb  cli_transport_serial.o [2]
+cli_vsnprintf            0x800'0a37    0x8  Code  Gb  cli.o [4]
+cli_write_char           0x800'0ad1    0xc  Code  Lc  cli.o [4]
+cli_write_str            0x800'0ab5   0x1c  Code  Lc  cli.o [4]
+cmd_add                  0x800'4aa3   0x64  Code  Lc  cli_demo_setup.o [2]
+cmd_arithmetic           0x800'4a97    0xc  Code  Lc  cli_demo_setup.o [2]
+cmd_calculator           0x800'4a71   0x26  Code  Lc  cli_demo_setup.o [2]
+cmd_led                  0x800'49f1   0x6c  Code  Lc  cli_demo_setup.o [2]
+cmd_reboot               0x800'4a5d   0x14  Code  Lc  cli_demo_setup.o [2]
+cmd_show_version         0x800'49cf   0x22  Code  Lc  cli_demo_setup.o [2]
+cmd_sub                  0x800'4b07   0x64  Code  Lc  cli_demo_setup.o [2]
+dec_value                0x800'5299    0x6  Code  Lc  cli_args_parse.o [6]
+exit                     0x800'5b8f    0x4  Code  Gb  exit.o [7]
+frexp                    0x800'35bd         Code  Gb  frexp.o [8]
+frexpl                   0x800'35bd         Code  Gb  frexp.o [8]
+handle_csi               0x800'22df   0xb2  Code  Lc  cli.o [4]
+huart2                  0x2000'0c98   0x48  Data  Gb  main.o [2]
+is_dec_digit             0x800'5287   0x12  Code  Lc  cli_args_parse.o [6]
+ldexp                    0x800'3695         Code  Gb  ldexp.o [8]
+ldexpl                   0x800'3695         Code  Gb  ldexp.o [8]
+localeconv               0x800'3501    0x4  Code  Gb  xlocale_c.o [7]
+main                     0x800'5819   0x1e  Code  Gb  main.o [2]
+memchr                   0x800'3565         Code  Gb  memchr.o [9]
+parse_i32                0x800'5225   0x62  Code  Gb  cli_args_parse.o [6]
+parse_i64                0x800'50cd  0x158  Code  Gb  cli_args_parse.o [6]
+s_app                   0x2000'0ce0    0xc  Data  Lc  cli_demo_setup.o [2]
+s_cli                   0x2000'085c  0x43c  Data  Lc  cli_demo_setup.o [2]
+s_cmd_pool              0x2000'008c  0x7d0  Data  Lc  cli_demo_setup.o [2]
+s_session_id            0x2000'0cec    0x4  Data  Lc  cli_demo_setup.o [2]
+s_stm32_pending_byte    0x2000'0cfc    0x1  Data  Lc  cli_transport_serial.o [2]
+s_stm32_pending_valid   0x2000'0cfd    0x1  Data  Lc  cli_transport_serial.o [2]
+scalbln                  0x800'3695         Code  Gb  ldexp.o [8]
+scalblnl                 0x800'3695         Code  Gb  ldexp.o [8]
+scalbn                   0x800'3695         Code  Gb  ldexp.o [8]
+scalbnl                  0x800'3695         Code  Gb  ldexp.o [8]
+scale                    0x800'3415   0x46  Code  Lc  xprintffull_nomb.o [7]
+sec_hand                0x2000'0cf4    0x4  Data  Lc  xfail_s.o [7]
+stm32_now_sec            0x800'4da5   0x10  Code  Lc  cli_demo_setup.o [2]
+stm32_serial_available   0x800'4ff5   0x42  Code  Lc  cli_transport_serial.o [2]
+stm32_serial_flush       0x800'50a1    0x4  Code  Lc  cli_transport_serial.o [2]
+stm32_serial_read        0x800'5039   0x32  Code  Lc  cli_transport_serial.o [2]
+stm32_serial_write       0x800'5075   0x2c  Code  Lc  cli_transport_serial.o [2]
+strchr                   0x800'350d         Code  Gb  strchr.o [9]
+strcmp                   0x800'2601         Code  Gb  strcmp.o [9]
+strlen                   0x800'24e1         Code  Gb  strlen.o [9]
+tolower                  0x800'2555   0x14  Code  Gb  tolower.o [7]
+uwTick                  0x2000'0cf0    0x4  Data  Gb  stm32f1xx_hal.o [5]
+uwTickFreq              0x2000'0088    0x1  Data  Gb  stm32f1xx_hal.o [5]
+uwTickPrio              0x2000'0000    0x4  Data  Gb  stm32f1xx_hal.o [5]
+vsnprintf                0x800'2519   0x3c  Code  Gb  vsnprint.o [7]
+
+
+[1] = I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\CMSIS_6603591812247902717.dir
+[2] = I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\Core_13247989168731456611.dir
+[3] = I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\EWARM_18443280873093131863.dir
+[4] = I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\OpenLibCLI_17672967797026343405.dir
+[5] = I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\STM32F1xx_HAL_Driver_9701002599162248031.dir
+[6] = I:\openlibcli-project\OpenLibCLI-Embedded-Demos\STM32\serial\EWARM\OpenLibCLI\Obj\utils_15222801219514222262.dir
+[7] = dl7M_tlf.a
+[8] = m7M_tl.a
+[9] = rt7M_tl.a
+[10] = shb_l.a
+
+  22'975 bytes of readonly  code memory
+   1'675 bytes of readonly  data memory
+   7'419 bytes of readwrite data memory
+
+Errors: none
+Warnings: none

@@ -1,0 +1,37 @@
+# Schema B: ESP-IDF-style flat dict
+# 'kind' is optional — inferred from name if absent (DRAM/IRAM/SRAM/RAM → ram, CACHE/FLASH/ROM → flash)
+# 'name' is optional — defaults to the YAML key
+# 'length' supports arithmetic expressions (safe eval, not raw eval())
+DRAM:
+  primary_address: 0x3FFAE000
+  length: 17 * 0x2000 + 4 * 0x8000 + 4 * 0x4000
+  kind: ram
+IRAM:
+  primary_address: 0x40070000
+  length: 0x50000
+  kind: ram
+FLASH_CODE:
+  primary_address: 0x400C2000
+  length: 0xB3E000
+  name: Flash Code
+  kind: flash
+FLASH_DATA:
+  primary_address: 0x3F400000
+  length: 0x400000
+  name: Flash Data
+  kind: flash
+SPI_DRAM:
+  primary_address: 0x3F800000
+  length: 0x400000
+  name: SPI DRAM
+RTC_FAST:
+  primary_address: 0x3FF80000
+  length: 0x2000
+  secondary_address: 0x400C0000
+  name: RTC FAST
+  kind: ram
+RTC_SLOW:
+  primary_address: 0x50000000
+  length: 0x2000
+  name: RTC SLOW
+  kind: ram

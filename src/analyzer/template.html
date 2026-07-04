@@ -1,0 +1,1437 @@
+{#- ============================================================
+    OpenMapFile Analyzer — Jinja2 HTML report template
+    Custom filters : nice_size, size_with_hex, pct(n, d)
+    Globals        : min, max, pct
+    ============================================================ -#}
+
+{# ------------------------------------------------------------------ #}
+{# MACRO: capacity meter card                                          #}
+{# ------------------------------------------------------------------ #}
+{% macro meter(card, show_export=False) -%}
+<article class='capacity-card{% if show_export %} export-container{% endif %}'{% if show_export %} data-export="{{ card.title }}"{% endif %}>
+  <div class='card-title'>
+    <h3>{{ card.title }}</h3>
+    <strong>{{ "%.1f" % card.percent }}%</strong>
+    {% if show_export %}<button class="export-btn" onclick="exportContainer(this)" title="Export as PNG"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>{% endif %}
+  </div>
+  <div class='meter'><i style='width:{{ min(card.percent, 100) | round(3) }}%'></i></div>
+  <p><span class="size-val" data-bytes="{{ card.used }}">{{ card.used | nice_size }}</span> used from <span class="size-val" data-bytes="{{ card.cap }}">{{ card.cap | nice_size }}</span> capacity</p>
+  <ul>
+    {% for label, value in card.breakdown if value or label %}
+    <li><b>{{ label }}</b><span class="size-val" data-bytes="{{ value }}">{{ value | nice_size }}</span></li>
+    {% endfor %}
+  </ul>
+  {% if card.note %}<p class='muted note'>{{ card.note }}</p>{% endif %}
+</article>
+{%- endmacro %}
+
+{# ------------------------------------------------------------------ #}
+{# MACRO: generic sortable table (sections, archives, sources, symbols)#}
+{# cols = list of {key, label} dicts                                   #}
+{# ------------------------------------------------------------------ #}
+{% macro render_table(rows, cols, table_id) -%}
+{% if not rows %}
+<p class="muted">No data found.</p>
+{% else %}
+{%- set ns = namespace(max_total=1) -%}
+{%- for row in rows -%}
+  {%- if row.get('total', 0) > ns.max_total -%}{%- set ns.max_total = row.get('total', 0) -%}{%- endif -%}
+{%- endfor -%}
+<div class="table-wrap"><table id="{{ table_id }}">
+  <thead><tr>{% for col in cols %}<th>{{ col.label }}</th>{% endfor %}</tr></thead>
+  <tbody>
+  {% for row in rows %}<tr>
+    {%- for col in cols -%}
+    {%- set key   = col.key -%}
+    {%- set value = row.get(key, 0) -%}
+    {%- if key == 'name' -%}
+      <td class='name'>{{ value }}</td>
+    {%- elif key == 'bar' -%}
+      {%- set bar_w = min(((row.get('total', 0) / ns.max_total * 100) | int), 100) -%}
+      <td><div class="bar"><span style="width:{{ bar_w }}%"></span></div></td>
+    {%- elif key == 'local_stack' or key == 'max_stack' -%}
+      {%- if value is none or value == -1 or value == '' -%}
+        <td data-sort='-1'>-</td>
+      {%- else -%}
+        <td data-sort='{{ value }}' class="size-val" data-bytes="{{ value }}">{{ value | int | nice_size }}</td>
+      {%- endif -%}
+    {%- elif value is number -%}
+      <td data-sort='{{ value }}' class="size-val" data-bytes="{{ value }}">{{ value | nice_size }}</td>
+    {%- else -%}
+      <td>{{ value }}</td>
+    {%- endif -%}
+    {%- endfor %}
+  </tr>{% endfor %}
+  </tbody>
+</table></div>
+{% endif %}
+{%- endmacro %}
+
+{# ------------------------------------------------------------------ #}
+{# MACRO: module table (Top ROM / Top Code / Top RAM / Libraries)      #}
+{# ------------------------------------------------------------------ #}
+{% macro module_table(rows, table_id, total) -%}
+{% if not rows %}
+<p class="muted">No data found.</p>
+{% else %}
+{%- set ns = namespace(max_share=1) -%}
+{%- for row in rows -%}
+  {%- set share = (row.get('rom', 0) | int) + (row.get('ram', 0) | int) -%}
+  {%- if share > ns.max_share -%}{%- set ns.max_share = share -%}{%- endif -%}
+{%- endfor -%}
+<div class='table-wrap'><table id='{{ table_id }}' class='data-table'>
+  <thead><tr><th>#</th><th>Module</th><th>Category</th><th>Code</th><th>RO data</th><th>RW data</th><th>ZI/BSS</th><th>Total</th><th>Share</th></tr></thead>
+  <tbody>
+  {% for row in rows %}
+  {%- set share_basis = (row.get('rom', 0) | int) + (row.get('ram', 0) | int) -%}
+  {%- set share_width = min(share_basis / ns.max_share * 100, 100) if ns.max_share else 0 -%}
+  <tr>
+    <td>{{ loop.index }}</td>
+    <td class='name'>{{ row.get('name', '') }}</td>
+    <td><span class='tag tag{{ row.tag_id }}'>{{ row.get('category', 'Other') }}</span></td>
+    <td data-sort='{{ row.get("code",   0) | int }}' class="size-val" data-bytes="{{ row.get('code', 0) | int }}">{{ row.get("code",   0) | int | nice_size }}</td>
+    <td data-sort='{{ row.get("rodata", 0) | int }}' class="size-val" data-bytes="{{ row.get('rodata', 0) | int }}">{{ row.get("rodata", 0) | int | nice_size }}</td>
+    <td data-sort='{{ row.get("data",   0) | int }}' class="size-val" data-bytes="{{ row.get('data', 0) | int }}">{{ row.get("data",   0) | int | nice_size }}</td>
+    <td data-sort='{{ row.get("bss",    0) | int }}' class="size-val" data-bytes="{{ row.get('bss', 0) | int }}">{{ row.get("bss",    0) | int | nice_size }}</td>
+    <td data-sort='{{ row.get("total",  0) | int }}' class="size-val" data-bytes="{{ row.get('total', 0) | int }}"><b>{{ row.get("total", 0) | int | nice_size }}</b></td>
+    <td><div class='share'><i style='width:{{ "%.2f" % share_width }}%'></i></div>{{ share_basis | pct(total) }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{% endif %}
+{%- endmacro %}
+
+{# ------------------------------------------------------------------ #}
+{# MACRO: stack usage table                                             #}
+{# ------------------------------------------------------------------ #}
+{% macro stack_table(entries, table_id) -%}
+{% if not entries %}
+<p class="muted">No stack usage data found.</p>
+{% else %}
+<div class="table-wrap"><table id="{{ table_id }}" class="data-table">
+  <thead><tr><th>#</th><th>Function</th><th>Local Stack Size</th><th>Max Stack Depth</th><th>Source File:Line</th><th>Type</th></tr></thead>
+  <tbody>
+  {% for entry in entries %}
+  <tr>
+    <td>{{ loop.index }}</td>
+    <td class='name'>{{ entry.symbol }}</td>
+    <td data-sort='{{ entry.local_size }}' class="size-val" data-bytes="{{ entry.local_size }}">{{ entry.local_size | nice_size }}</td>
+    <td data-sort='{{ entry.max_depth }}' class="size-val" data-bytes="{{ entry.max_depth }}"><b>{{ entry.max_depth | nice_size }}</b></td>
+    <td>{{ entry.source_file }}{% if entry.line %}:{{ entry.line }}{% endif %}</td>
+    <td><span class='tag tag7'>{{ entry.qualifier }}</span></td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{% endif %}
+{%- endmacro %}
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Map file memory report - {{ basename }}</title>
+<style>
+:root{--bg:#f7f8fb;--panel:#ffffff;--ink:#16202a;--muted:#657282;--line:#dfe5ec;--accent:#1f6feb;--accent2:#14a38b;--warn:#b45309;}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 Inter,Segoe UI,Arial,sans-serif} a{color:var(--accent)}
+.report-shell{display:grid;grid-template-columns:260px minmax(0,1fr);min-height:100vh} aside{background:#101827;color:#dbeafe;padding:28px 22px;position:sticky;top:0;height:100vh;overflow-y:auto} aside h1{font-size:23px;line-height:1.15;margin:0 0 14px} aside p{color:#9fb2c8;margin:0 0 24px} .toc{display:grid;gap:10px;margin-top:22px} .toc a{color:#dbeafe;text-decoration:none;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:9px 10px} .toc a:hover{background:rgba(255,255,255,.08)}
+main{padding:28px;max-width:1500px} .topline{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:20px} .topline h2{font-size:28px;margin:0} .topline .meta{color:var(--muted);font-size:13px;text-align:right}
+.metrics{display:grid;grid-template-columns:repeat(5,minmax(160px,1fr));gap:14px;margin-bottom:18px} .metric-card,.capacity-card,.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 24px rgba(18,31,53,.05)} .metric-card{padding:16px} .metric-card span{display:block;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em} .metric-card strong{display:block;font-size:24px;margin:6px 0;color:#0b3b86} .metric-card small{color:var(--muted)}
+.capacity-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:18px 0} .capacity-card{padding:18px} .card-title{display:flex;align-items:center;gap:12px} .card-title h3{margin:0;font-size:17px;flex:1} .card-title strong{color:var(--accent)} .meter{height:12px;border-radius:999px;background:#eef2f7;overflow:hidden;margin:14px 0 8px} .meter i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent2))} .capacity-card p{margin:0 0 12px;color:var(--muted)} .capacity-card ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 18px;margin:0;padding:0;list-style:none} .capacity-card li{display:flex;justify-content:space-between;border-top:1px dashed var(--line);padding-top:7px}
+.layout-two{display:grid;grid-template-columns:1fr 1fr;gap:16px} .panel{padding:18px;margin:16px 0} .panel h2{font-size:18px;margin:0 0 14px;border-left:4px solid var(--accent);padding-left:10px} canvas{width:100%;display:block}
+.chart-h340{height:340px} .chart-h420{height:420px} .chart-h280{height:280px} .chart-h500{height:500px} .chart-h260{height:260px}
+.table-wrap{overflow:auto} table{width:100%;border-collapse:collapse;min-width:760px} th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap} th{background:#f2f5f9;color:#334155;position:sticky;top:0;cursor:pointer} td.name,th:nth-child(2),td:nth-child(2),th:first-child,td:first-child{text-align:left} tr:hover{background:#fafcff} .toolbar{margin:0 0 12px} input{border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:280px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px} .tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 14px;cursor:pointer} .tab.active{background:#102a43;color:#fff;border-color:#102a43} .tabpane{display:none} .tabpane.active{display:block} .share{display:inline-block;width:84px;height:8px;background:#e8edf4;border-radius:999px;margin-right:8px;vertical-align:middle;overflow:hidden} .share i{display:block;height:100%;background:var(--accent)} .bar{display:inline-block;width:110px;height:8px;background:#e8edf4;border-radius:999px;overflow:hidden} .bar span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.linker-meta-grid{display:grid;grid-template-columns:160px 1fr;gap:6px 14px;margin:0 0 18px;font-size:13px} .linker-meta-grid dt{color:var(--muted);font-weight:600} .linker-meta-grid dd{margin:0} .linker-raw{background:#0d1117;color:#c9d1d9;border-radius:10px;padding:16px 18px;overflow:auto;max-height:420px;font:12px/1.6 'Cascadia Code','Fira Code','Consolas',monospace;white-space:pre;border:1px solid #30363d} .linker-regions-wrap{margin-bottom:18px}
+.tag{border-radius:999px;padding:3px 8px;font-size:12px;font-weight:700;background:#eef2f7;color:#334155} .tag0{background:#e0f2fe;color:#075985}.tag1{background:#dcfce7;color:#166534}.tag2{background:#fef3c7;color:#92400e}.tag3{background:#ede9fe;color:#5b21b6}.tag4{background:#fee2e2;color:#991b1b}.tag5{background:#ccfbf1;color:#115e59}.tag6{background:#fce7f3;color:#9d174d}.tag7{background:#f1f5f9;color:#475569}
+.tag-ok{background:#dcfce7;color:#166534}.tag-warn{background:#fef3c7;color:#92400e}.tag-error{background:#fee2e2;color:#991b1b}
+.muted{color:var(--muted)} .note{margin-top:12px!important} .warning{border-color:#f59e0b;background:#fffbeb} footer{color:var(--muted);font-size:12px;margin:24px 0 0}
+.unit-toggle-container{display:flex;gap:6px;align-items:center;margin-top:14px;background:rgba(255,255,255,0.06);padding:6px;border-radius:10px}
+.unit-toggle-container span{color:#9fb2c8;font-size:12px}
+.btn-toggle{background:none;border:none;color:#9fb2c8;font-size:11px;padding:4px 8px;border-radius:6px;cursor:pointer;flex:1}
+.slider-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-bottom:12px;padding:10px 14px;background:#f2f5f9;border-radius:10px;border:1px solid var(--line)}
+.slider-row label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+.slider-row input[type=range]{flex:1;min-width:100px;height:4px;-webkit-appearance:none;appearance:none;background:#dfe5ec;border-radius:4px;outline:none;cursor:pointer}
+.slider-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.2);cursor:pointer;transition:transform .1s}
+.slider-row input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+.slider-row input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--accent);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.2);cursor:pointer}
+.slider-row .slider-value{font-variant-numeric:tabular-nums;font-weight:700;font-size:13px;min-width:3.2em;text-align:right;color:var(--ink)}
+.slider-row .slider-count{font-size:12px;color:var(--muted);white-space:nowrap}
+.slider-row .slider-reset{background:none;border:1px solid var(--line);border-radius:6px;color:var(--muted);font-size:11px;padding:3px 8px;cursor:pointer;transition:all .12s}
+.slider-row .slider-reset:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-toggle.active{background:rgba(255,255,255,0.15);color:#fff;font-weight:bold}
+.export-btn{display:inline-flex;align-items:center;justify-content:center;background:var(--panel);border:1px solid var(--line);cursor:pointer;color:var(--text);padding:4px 6px;border-radius:6px;transition:all .15s;line-height:1;vertical-align:middle;opacity:.7}
+.export-btn svg{display:block;width:14px;height:14px;pointer-events:none}
+.export-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent);opacity:1}
+.export-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent);opacity:1}
+.export-btn-all{display:block;margin-top:6px;color:#7dd3fc;text-decoration:none;font-size:12px;font-weight:600;padding:7px 10px;background:rgba(255,255,255,0.06);border-radius:8px;border:1px solid rgba(255,255,255,0.1);cursor:pointer;text-align:center}
+.export-btn-all:hover:not(:disabled){background:rgba(255,255,255,0.12)}
+.export-btn-all:disabled{opacity:0.5;cursor:not-allowed;background:rgba(255,255,255,0.03)}
+.export-container{position:relative}
+.export-container .export-btn{opacity:.65}
+.export-container .export-btn:hover{opacity:1}
+.panel h2{display:flex;align-items:center;gap:8px}
+.panel h2 .export-btn{margin-left:auto}
+.top-note{font-weight:600;font-size:11px;color:#fff;background:#6366f1;padding:1px 7px 2px;border-radius:10px;white-space:nowrap;letter-spacing:.02em}
+.unit-info-icon{position:relative;display:inline-flex;align-items:center;cursor:default;color:#9fb2c8;font-size:12px;margin-left:2px;flex-shrink:0}
+.unit-info-icon svg{width:13px;height:13px;vertical-align:middle;opacity:.65}
+.unit-info-icon:hover svg{opacity:1}
+.unit-tooltip{display:none;position:fixed;background:#0d1117;color:#c9d1d9;font-size:11px;line-height:1.55;padding:10px 12px;border-radius:8px;border:1px solid #30363d;width:230px;pointer-events:none;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.5)}
+.unit-info-icon:hover .unit-tooltip{display:block}
+/* Tooltip */
+#chart-tooltip{position:fixed;pointer-events:none;background:rgba(16,24,39,.92);color:#e2e8f0;padding:10px 14px;border-radius:10px;font-size:12px;line-height:1.6;z-index:9999;display:none;max-width:240px;box-shadow:0 4px 20px rgba(0,0,0,.35)}
+@media(max-width:980px){.report-shell{display:block} aside{position:static;height:auto} .metrics{grid-template-columns:repeat(2,1fr)} .capacity-grid,.layout-two{grid-template-columns:1fr} .topline{display:block} .topline .meta{text-align:left;margin-top:8px}} @media(max-width:560px){main{padding:16px} .metrics{grid-template-columns:1fr}}
+</style>
+
+</head>
+<body>
+<div class="report-shell">
+
+{# ---- Sidebar ---- #}
+<aside>
+  <h1>Map File Analyzer</h1>
+  <p>{{ basename }}<br>{{ parser_hint }}</p>
+  <div class="unit-toggle-container">
+    <span>Units:</span>
+    <button id="unitBtnBinary" class="btn-toggle active" onclick="setUnitSystem('binary')">Binary (KiB)</button>
+    <button id="unitBtnDecimal" class="btn-toggle" onclick="setUnitSystem('decimal')">Decimal (KB)</button>
+    <span class="unit-info-icon" role="img" aria-label="Unit system info">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1Zm0 3a.75.75 0 1 1 0 1.5A.75.75 0 0 1 8 4Zm-.25 3h1.5v4.5h-1.5V7Z"/></svg>
+      <div class="unit-tooltip">
+        <b>Binary (KiB)</b> — 1 KiB&nbsp;=&nbsp;1024&nbsp;B (IEC&nbsp;standard)<br>
+        <b>Decimal (KB)</b> — 1 KB&nbsp;=&nbsp;1000&nbsp;B (SI&nbsp;standard)<br><br>
+        Values that are powers of 2 (e.g.&nbsp;4096&nbsp;B) appear as <b>4.0&nbsp;KiB</b> in binary but <b>4.1&nbsp;KB</b> in decimal because 4096&nbsp;÷&nbsp;1000&nbsp;=&nbsp;4.096.
+      </div>
+    </span>
+  </div>
+  {% if linker_name %}<a href="#linker" id="toc-linker" style="display:block;margin-top:12px;color:#7dd3fc;text-decoration:none;font-size:12px;font-weight:600;padding:7px 10px;background:rgba(255,255,255,0.06);border-radius:8px;border:1px solid rgba(255,255,255,0.1)">🔗 Linker Script</a>{% endif %}
+  {% if chip_config_name %}<a href="#chip-config" style="display:block;margin-top:6px;color:#7dd3fc;text-decoration:none;font-size:12px;font-weight:600;padding:7px 10px;background:rgba(255,255,255,0.06);border-radius:8px;border:1px solid rgba(255,255,255,0.1)">📋 Chip Config</a>{% endif %}
+  <button class="export-btn-all" onclick="exportAll()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:middle;margin-right:5px;pointer-events:none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export All Images</button>
+  <nav class="toc">
+    <a href="#overview">Overview</a>
+    <a href="#capacity">Capacity</a>
+    <a href="#categories">Categories</a>
+    <a href="#addr-space">Address Space</a>
+    <a href="#bubble">ROM vs RAM</a>
+    <a href="#treemap">Treemap</a>
+    <a href="#section-donut">Sections</a>
+    <a href="#modules">Modules</a>
+    {% if stack_entries %}<a href="#stack-usage">Stack Usage</a>{% endif %}
+    <a href="#details">Details</a>
+  </nav>
+</aside>
+
+{# ---- Main content ---- #}
+<main>
+  <div class="topline">
+    <h2 id="overview">Memory report</h2>
+    <div class="meta">Generated {{ generated_at }}<br>openmapfileanalyzer</div>
+  </div>
+
+  {# Warnings #}
+  {% if warnings %}
+  <section class="panel warning">
+    <h2>Warnings / Layout Conflicts</h2>
+    <ul>{% for w in warnings %}<li>{{ w }}</li>{% endfor %}</ul>
+  </section>
+  {% endif %}
+
+  {# Top-level metric cards #}
+  <section class="metrics">
+    {% for m in metrics %}
+    <article class='metric-card'>
+      <span>{{ m.label }}</span>
+      <strong {% if m.bytes is not none %}class="size-val" data-bytes="{{ m.bytes }}"{% endif %}>{{ m.shown }}</strong>
+      <small>{{ m.raw }}{{ m.desc }}</small>
+    </article>
+    {% endfor %}
+  </section>
+
+  {# Capacity meters #}
+  <section id="capacity" class="capacity-grid">
+    {{ meter(flash_card, show_export=True) }}
+    {{ meter(ram_card, show_export=True) }}
+  </section>
+
+  {# Memory regions table #}
+  <section class='panel'>
+    <h2>Memory regions</h2>
+    {% if region_rows %}
+    <div class='table-wrap'><table>
+      <thead><tr><th>Region</th><th>Origin</th><th>Capacity</th><th>Used</th><th>Used %</th><th>Status</th><th>Attributes</th></tr></thead>
+      <tbody>
+      {% for row in region_rows %}
+      <tr>
+        <td class='name'>{{ row.name }}</td>
+        <td>{{ row.origin }}</td>
+        <td data-sort='{{ row.capacity }}' class="size-val" data-bytes="{{ row.capacity }}" data-format="hex">{{ row.capacity | size_with_hex }}</td>
+        <td data-sort='{{ row.used }}' class="size-val" data-bytes="{{ row.used }}">{{ row.used | nice_size }}</td>
+        <td>{{ row.used_pct }}</td>
+        <td>
+          {% if row.status == 'OVERFLOW' %}
+            <span class='tag tag-error'>⚠️ Overflow</span>
+          {% elif row.status == 'OVERLAP' %}
+            <span class='tag tag-warn'>⚠️ Overlap</span>
+          {% else %}
+            <span class='tag tag-ok'>OK</span>
+          {% endif %}
+        </td>
+        <td>{{ row.attrs }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    {% else %}
+    <p class="muted">No memory region table was detected.</p>
+    {% endif %}
+  </section>
+
+  {# Category charts #}
+  <section id="categories" class="layout-two">
+    <article class="panel"><div class="export-container" data-export="ROM by category"><h2>ROM by category <button class="export-btn" onclick="exportContainer(this)" title="Export as PNG"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></h2><canvas id="romChart" class="chart-h340"></canvas></div></article>
+    <article class="panel"><div class="export-container" data-export="RAM by category"><h2>RAM by category <button class="export-btn" onclick="exportContainer(this)" title="Export as PNG"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></h2><canvas id="ramChart" class="chart-h340"></canvas></div></article>
+  </section>
+  <section class="panel"><div class="export-container" data-export="Category composition"><h2>Category composition <button class="export-btn" onclick="exportContainer(this)" title="Export as PNG"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></h2><canvas id="categoryStack" class="chart-h420"></canvas></div></section>
+
+  {# ① Physical Address Space Map #}
+  <section id="addr-space" class="panel">
+    <div class="export-container" data-export="Physical address space map">
+    <h2>Physical address space map <button class="export-btn" onclick="exportContainer(this)" title="Export as PNG"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></h2>
+    <p class="muted">Each row is one linker memory region. The filled portion shows bytes used; the empty portion is available headroom.</p>
+    <canvas id="addrSpaceChart" class="chart-h280"></canvas>
+    </div>
+  </section>
+
+  {# ② ROM vs RAM Bubble Chart #}
+  <section id="bubble" class="panel">
+    <div class="export-container" data-export="ROM vs RAM bubble chart">
+    <h2>ROM vs RAM bubble chart <button class="export-btn" onclick="exportContainer(this)" title="Export as PNG"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></h2>
+    <p class="muted">Each bubble is one object/module. X = ROM footprint, Y = RAM footprint, bubble area ∝ total size. Top 15 by total are labelled.</p>
+    <div class="slider-row">
+      <label for="bubbleThreshold">Show top</label>
+      <input type="range" id="bubbleThreshold" min="5" max="100" value="100" step="1">
+      <span class="slider-value" id="bubbleThresholdLabel">100</span>
+      <span class="slider-count" id="bubbleCountLabel">modules</span>
+      <button class="slider-reset" id="bubbleReset" title="Reset to show all">✕</button>
+    </div>
+    <canvas id="bubbleChart" class="chart-h500"></canvas>
+    </div>
+  </section>
+
+  {# ③ Treemap #}
+  <section id="treemap" class="panel">
+    <div class="export-container" data-export="Memory treemap">
+    <h2>Memory treemap <button class="export-btn" onclick="exportContainer(this)" title="Export as PNG"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></h2>
+    <p class="muted">Rectangle area ∝ total size. Hover for details. Top 80 modules shown, coloured by category.</p>
+    <canvas id="treemapChart" class="chart-h500"></canvas>
+    </div>
+  </section>
+
+  {# ④ Section Donut #}
+  <section id="section-donut" class="layout-two">
+    <article class="panel">
+      <div class="export-container" data-export="Linker section breakdown">
+      <h2>Linker section breakdown <button class="export-btn" onclick="exportContainer(this)" title="Export as PNG"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></h2>
+      <p class="muted">One slice per linker section. Hover for byte count.</p>
+      <canvas id="donutChart" class="chart-h420"></canvas>
+      </div>
+    </article>
+    <article class="panel"><div class="export-container" data-export="Largest code modules"><h2>Largest code modules <button class="export-btn" onclick="exportContainer(this)" title="Export as PNG"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></h2><canvas id="topCode" class="chart-h420"></canvas></div></article>
+  </section>
+
+  {# Module analysis tabs #}
+  <section id="modules" class="panel">
+    <h2>Module analysis <span class="top-note">(top {{ top }})</span></h2>
+    <div class="tabs module-tabs">
+      <button class="tab active" data-tab="romtab">Top ROM</button>
+      <button class="tab" data-tab="codetab">Top Code</button>
+      <button class="tab" data-tab="ramtab">Top RAM</button>
+      <button class="tab" data-tab="libtab">Libraries</button>
+    </div>
+    <div class="toolbar"><input data-filter="moduleTable" placeholder="Filter modules or categories..."></div>
+    <div id="romtab"  class="tabpane module-tabpane active">{{ module_table(top_rom,   'moduleTable', total) }}</div>
+    <div id="codetab" class="tabpane module-tabpane">{{ module_table(top_code,  'codeTable',   total) }}</div>
+    <div id="ramtab"  class="tabpane module-tabpane">{{ module_table(top_ram,   'ramTable',    total) }}</div>
+    <div id="libtab"  class="tabpane module-tabpane">{{ render_table(by_archive, columns_common, 'libTable') }}</div>
+  </section>
+
+  {# Stack usage (optional) #}
+  {% if stack_entries %}
+  <section id="stack-usage" class="panel">
+    <h2>Stack Usage Analysis <span class="top-note">(top {{ top }})</span></h2>
+    <p class="muted">Estimated maximum stack depth for functions based on compiler-generated static stack usage.</p>
+    <div class="toolbar"><input data-filter="stackTable" placeholder="Filter functions..."></div>
+    {{ stack_table(stack_entries, 'stackTable') }}
+  </section>
+  {% endif %}
+
+  {# Detail tables #}
+  <section id="details" class="panel">
+    <h2>Section breakdown <span class="top-note">(top {{ top }})</span></h2>
+    <div class="toolbar"><input data-filter="sections" placeholder="Filter sections..."></div>
+    {{ render_table(by_section, columns_common, 'sections') }}
+  </section>
+  <section class="panel">
+    <h2>Archive / library breakdown <span class="top-note">(top {{ top }})</span></h2>
+    <div class="toolbar"><input data-filter="archives" placeholder="Filter libraries..."></div>
+    {{ render_table(by_archive, columns_common, 'archives') }}
+  </section>
+  <section class="panel">
+    <h2>Source-file estimate <span class="top-note">(top {{ top }})</span></h2>
+    <div class="toolbar"><input data-filter="sources" placeholder="Filter source estimates..."></div>
+    {{ render_table(by_source, columns_common, 'sources') }}
+  </section>
+  <section class="panel">
+    <h2>Variables & Functions <span class="top-note">(top {{ top }})</span></h2>
+    <p class="muted">Shown when the map file contains symbol-size information.</p>
+    <div class="toolbar"><input data-filter="symbols" placeholder="Filter symbols..."></div>
+    {{ render_table(symbol_rows, symbol_cols, 'symbols') }}
+  </section>
+
+  {# Linker Script Info (only when --linker was passed) #}
+  {% if linker_name %}
+  <section id="linker" class="panel">
+    <h2>Linker Script Info</h2>
+    <dl class="linker-meta-grid">
+      <dt>File</dt><dd>{{ linker_name }}</dd>
+      <dt>Format</dt><dd>{{ linker_format }}</dd>
+      {% if linker_regions %}
+      <dt>Regions parsed</dt><dd>{{ linker_regions | length }}</dd>
+      {% endif %}
+      {% if linker_extras.get('stack_size') %}
+      <dt>Stack size</dt><dd><span class="size-val" data-bytes="{{ linker_extras.stack_size }}">{{ linker_extras.stack_size | nice_size }}</span> <span style="color:var(--muted);font-size:11px">(0x{{ "%X" % linker_extras.stack_size }} / {{ linker_extras.stack_size }} B)</span></dd>
+      {% endif %}
+      {% if linker_extras.get('heap_size') %}
+      <dt>Heap size</dt><dd><span class="size-val" data-bytes="{{ linker_extras.heap_size }}">{{ linker_extras.heap_size | nice_size }}</span> <span style="color:var(--muted);font-size:11px">(0x{{ "%X" % linker_extras.heap_size }} / {{ linker_extras.heap_size }} B)</span></dd>
+      {% endif %}
+    </dl>
+
+    {% if linker_regions %}
+    <div class="linker-regions-wrap">
+      <h3 style="font-size:15px;margin:0 0 10px;color:var(--muted)">Defined memory regions</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Region</th><th>Start</th><th>End</th><th>Size</th><th>Type</th></tr></thead>
+        <tbody>
+        {% for r in linker_regions %}
+        {%- set _end = r.origin + r.length - 1 -%}
+        {%- set _type = 'RAM' if 'RAM' in r.name.upper() else ('ROM' if 'ROM' in r.name.upper() or 'FLASH' in r.name.upper() else 'Other') -%}
+        <tr>
+          <td class="name">{{ r.name }}</td>
+          <td>0x{{ "%08X" % r.origin }}</td>
+          <td>0x{{ "%08X" % _end }}</td>
+          <td class="size-val" data-bytes="{{ r.length }}">{{ r.length | nice_size }}</td>
+          <td><span class="tag {% if _type == 'ROM' %}tag0{% elif _type == 'RAM' %}tag1{% else %}tag7{% endif %}">{{ _type }}</span></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table></div>
+    </div>
+    {% endif %}
+
+
+    {% if linker_extras.get('sections') %}
+    <div class="linker-regions-wrap">
+      <h3 style="font-size:15px;margin:0 0 10px;color:var(--muted)">Section &rarr; region mapping</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Section</th><th>VMA region (run)</th><th>LMA region (load)</th><th>Notes</th></tr></thead>
+        <tbody>
+        {% for s in linker_extras.sections %}
+        {%- set _vma_type = 'RAM' if 'RAM' in s.vma.upper() else ('ROM' if 'ROM' in s.vma.upper() or 'FLASH' in s.vma.upper() else 'Other') -%}
+        <tr>
+          <td class="name" style="font-family:'Cascadia Code','Fira Code',monospace;font-size:12px">{{ s.name }}</td>
+          <td><span class="tag {% if _vma_type == 'ROM' %}tag0{% elif _vma_type == 'RAM' %}tag1{% else %}tag7{% endif %}">{{ s.vma }}</span></td>
+          <td>
+            {% if s.lma %}
+            {%- set _lma_type = 'RAM' if 'RAM' in s.lma.upper() else ('ROM' if 'ROM' in s.lma.upper() or 'FLASH' in s.lma.upper() else 'Other') -%}
+            <span class="tag {% if _lma_type == 'ROM' %}tag0{% elif _lma_type == 'RAM' %}tag1{% else %}tag7{% endif %}">{{ s.lma }}</span>
+            {% else %}—{% endif %}
+          </td>
+          <td>
+            {% if s.lma and s.lma != s.vma %}
+            <span class="tag tag2" title="Stored in {{ s.lma }}, copied to {{ s.vma }} by startup code">Init from ROM</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table></div>
+    </div>
+    {% endif %}
+
+
+    {% if linker_extras.get('placements') %}
+    <div class="linker-regions-wrap">
+      <h3 style="font-size:15px;margin:0 0 10px;color:var(--muted)">Placement directives</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Content</th><th>Kind</th><th>Memory region / address</th><th>Notes</th></tr></thead>
+        <tbody>
+        {% for p in linker_extras.placements %}
+        {%- set _reg = p.region -%}
+        {%- set _reg_type = 'RAM' if 'RAM' in _reg.upper() else ('ROM' if 'ROM' in _reg.upper() or 'FLASH' in _reg.upper() or _reg.startswith('0x') else 'Other') -%}
+        <tr>
+          <td class="name" style="font-family:'Cascadia Code','Fira Code',monospace;font-size:12px">{{ p.label }}</td>
+          <td>
+            {% if p.kind == 'section' %}<span class="tag tag3">section</span>
+            {% elif p.kind == 'block' %}<span class="tag tag5">block</span>
+            {% else %}<span class="tag tag7">{{ p.label }}</span>{% endif %}
+          </td>
+          <td>
+            {% if p.at_address %}
+            <span class="tag tag7" style="font-family:monospace">{{ _reg }}</span>
+            {% else %}
+            <span class="tag {% if _reg_type == 'ROM' %}tag0{% elif _reg_type == 'RAM' %}tag1{% else %}tag7{% endif %}">{{ _reg }}</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if p.at_address %}<span class="tag tag6">Fixed address</span>
+            {% elif p.kind == 'block' and p.label in ('CSTACK', 'HEAP') %}<span class="tag tag5">{{ 'Stack' if p.label == 'CSTACK' else 'Heap' }} block</span>
+            {% elif p.label == 'readonly' %}<span class="muted" style="font-size:11px">Code + constants</span>
+            {% elif p.label == 'readwrite' %}<span class="muted" style="font-size:11px">Initialized data</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table></div>
+    </div>
+    {% endif %}
+
+    <h3 style="font-size:15px;margin:0 0 10px;color:var(--muted)">Raw linker script</h3>
+    <div class="tabs linker-tabs">
+      <button class="tab active" data-ltab="linker-raw-pane">Source</button>
+    </div>
+    <div id="linker-raw-pane" class="tabpane linker-tabpane active">
+      <pre class="linker-raw">{{ linker_content | e }}</pre>
+    </div>
+  </section>
+  {% endif %}
+
+  {# Chip Config Info (only when --chip-config was passed) #}
+  {% if chip_config_name %}
+  <section id="chip-config" class="panel">
+    <h2>Chip Config</h2>
+    <dl class="linker-meta-grid">
+      <dt>File</dt><dd>{{ chip_config_name }}</dd>
+      {% if chip_regions %}
+      <dt>Regions defined</dt><dd>{{ chip_regions | length }}</dd>
+      {% endif %}
+    </dl>
+
+    {% if chip_regions %}
+    <div class="linker-regions-wrap">
+      <h3 style="font-size:15px;margin:0 0 10px;color:var(--muted)">Memory regions</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Region</th><th>Start</th><th>End</th><th>Size</th><th>Kind</th><th>Used</th><th>Free</th><th>Util</th></tr></thead>
+        <tbody>
+        {% for r in chip_regions %}
+        {%- set _end = r.origin + r.length - 1 -%}
+        {%- set _free = r.length - r.used -%}
+        {%- set _pct = "%.1f" % (r.used / r.length * 100) if r.length else 0 -%}
+        {%- set _class = 'tag0' if r.kind == 'flash' else ('tag1' if r.kind == 'ram' else 'tag7') -%}
+        <tr>
+          <td class="name">{{ r.name }}</td>
+          <td>0x{{ "%08X" % r.origin }}</td>
+          <td>0x{{ "%08X" % _end }}</td>
+          <td class="size-val" data-bytes="{{ r.length }}">{{ r.length | nice_size }}</td>
+          <td><span class="tag {{ _class }}">{{ r.kind if r.kind else "—" }}</span></td>
+          <td class="size-val" data-bytes="{{ r.used }}">{{ r.used | nice_size }}</td>
+          <td class="size-val" data-bytes="{{ _free }}">{{ _free | nice_size }}</td>
+          <td>{{ _pct }}%</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table></div>
+    </div>
+    {% endif %}
+  </section>
+  {% endif %}
+
+  <footer>Parser profiles are best-effort. Verify critical figures against the linker output when using a new toolchain.</footer>
+</main>
+</div>
+
+{# Floating tooltip #}
+<div id="chart-tooltip"></div>
+
+<script>
+const DATA = {{ chart_data | tojson }};
+const COLORS = ['#1f6feb','#14a38b','#f59e0b','#7c3aed','#dc2626','#0891b2','#65a30d','#64748b','#db2777','#2563eb'];
+const CAT_COLORS = {};
+
+let unitSystem = 'binary';
+
+function fmt(n) {
+  n = +n || 0;
+  if (unitSystem === 'decimal') {
+    if (n < 1000) return n + ' B';
+    if (n < 1000000) return (n / 1000).toFixed(1) + ' KB';
+    return (n / 1000000).toFixed(1) + ' MB';
+  } else {
+    if (n < 1024) return n + ' B';
+    if (n < 1048576) return (n / 1024).toFixed(1) + ' KiB';
+    return (n / 1048576).toFixed(1) + ' MiB';
+  }
+}
+
+function setUnitSystem(sys) {
+  unitSystem = sys;
+  
+  // Update toggle buttons active class
+  document.getElementById('unitBtnBinary').classList.toggle('active', sys === 'binary');
+  document.getElementById('unitBtnDecimal').classList.toggle('active', sys === 'decimal');
+  
+  // Re-format all static elements marked with class "size-val"
+  document.querySelectorAll('.size-val').forEach(el => {
+    const bytes = parseInt(el.dataset.bytes, 10);
+    if (isNaN(bytes)) return;
+    
+    if (el.dataset.format === 'hex') {
+      el.textContent = fmt(bytes) + ' (0x' + bytes.toString(16).toUpperCase() + ')';
+    } else {
+      el.textContent = fmt(bytes);
+    }
+  });
+  
+  // Redraw charts
+  redraw();
+}
+
+function prep(canvas){
+  const dpr=window.devicePixelRatio||1;
+  const r=canvas.getBoundingClientRect();
+  canvas.width=r.width*dpr;
+  canvas.height=r.height*dpr;
+  const ctx=canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,r.width,r.height);
+  return [ctx,r.width,r.height];
+}
+
+// Assign stable colors to categories
+(function(){
+  const cats=[...new Set((DATA.category||[]).map(r=>r.name))];
+  cats.forEach((c,i)=>CAT_COLORS[c]=COLORS[i%COLORS.length]);
+})();
+
+// ─── Existing: ROM/RAM category bar charts ────────────────────────────────────
+function barChart(id,key){
+  const c=document.getElementById(id);if(!c)return;
+  const [ctx,w,h]=prep(c);
+  const rows=(DATA.category||[]).filter(r=>(r[key]||0)>0).slice(0,10);
+  const ml=150,mr=24,mt=18,mb=20,ph=h-mt-mb,pw=w-ml-mr;
+  const max=Math.max(...rows.map(r=>r[key]||0),1);
+  ctx.font='12px Segoe UI';ctx.textBaseline='middle';
+  const barArea=Math.max(40,pw-86);
+  rows.forEach((r,i)=>{
+    const y=mt+i*ph/Math.max(rows.length,1);
+    const bh=ph/Math.max(rows.length,1)*.58;
+    const cy=y+bh/2;
+    const raw=fmt(r[key]||0);
+    const tw=ctx.measureText(raw).width;
+    const barw=(r[key]||0)/max*barArea;
+    ctx.fillStyle='#334155';ctx.textAlign='right';
+    ctx.fillText(String(r.name).slice(0,22),ml-10,cy);
+    ctx.fillStyle=CAT_COLORS[r.name]||COLORS[i%COLORS.length];
+    ctx.fillRect(ml,y,barw,bh);
+    const outsideX=ml+barw+6;
+    const fitsOutside=outsideX<=w-mr-tw;
+    ctx.textAlign='left';
+    if(fitsOutside){ctx.fillStyle='#64748b';ctx.fillText(raw,outsideX,cy);}
+    else{ctx.fillStyle='#ffffff';ctx.fillText(raw,Math.max(ml+6,ml+barw-tw-6),cy);}
+  });
+}
+
+// ─── Existing: Category stacked bar ──────────────────────────────────────────
+function stack(){
+  const c=document.getElementById('categoryStack');if(!c)return;
+  const [ctx,w,h]=prep(c);
+  const rows=(DATA.category||[]).slice(0,12);
+  const ml=70,mr=20,mt=20,mb=120,pw=w-ml-mr,ph=h-mt-mb;
+  const max=Math.max(...rows.map(r=>(r.code||0)+(r.rodata||0)+(r.data||0)+(r.bss||0)),1);
+  const axisY=mt+ph;
+  ctx.strokeStyle='#e2e8f0';ctx.fillStyle='#64748b';ctx.font='11px Segoe UI';ctx.textBaseline='middle';
+  for(let i=0;i<=4;i++){
+    const y=mt+ph-i*ph/4;
+    ctx.beginPath();ctx.moveTo(ml,y);ctx.lineTo(w-mr,y);ctx.stroke();
+    ctx.fillText(fmt(max*i/4),8,y);
+  }
+  const parts=[['code','#1f6feb'],['rodata','#7c3aed'],['data','#f59e0b'],['bss','#14a38b']];
+  const slot=pw/Math.max(rows.length,1);
+  const bw=slot*.62;
+  rows.forEach((r,i)=>{
+    let x=ml+i*slot+slot*.19,y=axisY;
+    parts.forEach(([k,col])=>{
+      const hh=(r[k]||0)/max*ph;y-=hh;
+      ctx.fillStyle=col;ctx.fillRect(x,y,bw,hh);
+    });
+    ctx.save();ctx.translate(x+bw/2,axisY+18);ctx.rotate(-Math.PI/4.5);
+    ctx.fillStyle='#334155';ctx.font='10px Segoe UI';ctx.textAlign='right';ctx.textBaseline='middle';
+    ctx.fillText(String(r.name).slice(0,20),0,0);ctx.restore();
+  });
+}
+
+// ─── Existing: Top code horizontal bar ───────────────────────────────────────
+function topCode(){
+  const c=document.getElementById('topCode');if(!c)return;
+  const [ctx,w,h]=prep(c);
+  const rows=(DATA.topCode||[]).slice(0,24).reverse();
+  const ml=160,mr=30,mt=18,mb=20,pw=w-ml-mr,ph=h-mt-mb;
+  const max=Math.max(...rows.map(r=>r.code||0),1);
+  ctx.font='11px Segoe UI';
+  rows.forEach((r,i)=>{
+    const y=mt+i*ph/Math.max(rows.length,1);
+    const bh=ph/Math.max(rows.length,1)*.55;
+    ctx.fillStyle='#334155';ctx.textAlign='right';
+    ctx.fillText(String(r.name).slice(0,26),ml-8,y+bh);
+    ctx.fillStyle='#1f6feb';
+    ctx.fillRect(ml,y,(r.code||0)/max*pw,bh);
+    ctx.fillStyle='#64748b';ctx.textAlign='left';
+    ctx.fillText(fmt(r.code||0),ml+(r.code||0)/max*pw+5,y+bh);
+  });
+}
+
+// ─── ① Physical Address Space Map ────────────────────────────────────────────
+function addrSpace(){
+  const c=document.getElementById('addrSpaceChart');if(!c)return;
+  const [ctx,w,h]=prep(c);
+  const regions=DATA.addressSpace||[];
+  if(!regions.length){
+    ctx.fillStyle='#94a3b8';ctx.font='14px Segoe UI';ctx.textAlign='center';
+    ctx.fillText('No memory regions detected.',w/2,h/2);return;
+  }
+  const minAddr=Math.min(...regions.map(r=>r.origin));
+  const maxAddr=Math.max(...regions.map(r=>r.origin+r.length));
+  const span=maxAddr-minAddr||1;
+  const ml=90,mr=16,mt=14,rowH=36,gap=10;
+  const pw=w-ml-mr;
+
+  // Create diagonal stripe pattern for the empty/free headroom portion
+  const stripeCanvas = document.createElement('canvas');
+  stripeCanvas.width = 10;
+  stripeCanvas.height = 10;
+  const sCtx = stripeCanvas.getContext('2d');
+  sCtx.fillStyle = '#f8fafc'; // light slate-50 background
+  sCtx.fillRect(0, 0, 10, 10);
+  sCtx.strokeStyle = '#cbd5e1'; // slate-300 stripe lines
+  sCtx.lineWidth = 1.5;
+  sCtx.beginPath();
+  sCtx.moveTo(0, 10);
+  sCtx.lineTo(10, 0);
+  sCtx.stroke();
+  const pattern = ctx.createPattern(stripeCanvas, 'repeat');
+
+  // Helper to draw high-contrast text with a white stroke background, bounded to canvas width
+  function drawText(text, x, y, font, color) {
+    ctx.font = font;
+    ctx.textAlign = 'left';
+    const tw = ctx.measureText(text).width;
+    if (x + tw > w - mr) {
+      x = Math.max(ml + 4, w - mr - tw - 4);
+    }
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 3;
+    ctx.lineJoin = 'round';
+    ctx.strokeText(text, x, y);
+    ctx.fillStyle = color;
+    ctx.fillText(text, x, y);
+  }
+
+  regions.forEach((r,i)=>{
+    const y=mt+i*(rowH+gap);
+    let x0=ml+(r.origin-minAddr)/span*pw;
+    let bw=Math.max(r.length/span*pw,2);
+    
+    // Clamp so the bar doesn't extend beyond the right boundary
+    if (x0 + bw > w - mr) {
+      if (x0 > w - mr - 4) {
+        x0 = w - mr - 4;
+      }
+      bw = Math.min(bw, w - mr - x0);
+      if (bw < 2) bw = 2;
+    }
+    
+    const usedW=r.used?Math.max(r.used/r.length*bw,2):0;
+
+    // background (free portion - beautiful striped pattern)
+    ctx.fillStyle=pattern;
+    ctx.beginPath();ctx.roundRect(x0,y,bw,rowH-4,4);ctx.fill();
+
+    // used fill (solid blue)
+    if(usedW>0){
+      ctx.fillStyle='#1f6feb';
+      ctx.beginPath();ctx.roundRect(x0,y,usedW,rowH-4,4);ctx.fill();
+    }
+
+    // border around the entire bar to clearly define the bounds of the memory region
+    if (r.overflow) {
+      ctx.strokeStyle='#dc2626';
+      ctx.lineWidth=2;
+    } else if ((r.overlaps && r.overlaps.length > 0) || (r.section_overlaps && r.section_overlaps.length > 0)) {
+      ctx.strokeStyle='#ea580c';
+      ctx.lineWidth=2;
+    } else {
+      ctx.strokeStyle='#94a3b8';
+      ctx.lineWidth=1;
+    }
+    ctx.beginPath();ctx.roundRect(x0,y,bw,rowH-4,4);ctx.stroke();
+
+    // region name label (left gutter)
+    if (r.overflow) {
+      ctx.fillStyle='#dc2626';
+    } else if ((r.overlaps && r.overlaps.length > 0) || (r.section_overlaps && r.section_overlaps.length > 0)) {
+      ctx.fillStyle='#ea580c';
+    } else {
+      ctx.fillStyle='#334155';
+    }
+    ctx.font='bold 11px Segoe UI';
+    ctx.textAlign='right';ctx.textBaseline='middle';
+    ctx.fillText(r.name.slice(0,14),ml-6,y+(rowH-4)/2);
+
+    // origin address & used/total labels with white outline for perfect legibility
+    drawText('0x'+r.origin.toString(16).toUpperCase().padStart(8,'0'), x0+6, y+(rowH-4)/2-6, '10px Segoe UI', '#1e293b');
+
+    const pctStr=r.length?Math.round(r.used/r.length*100)+'%':'—';
+    drawText(fmt(r.used)+' / '+fmt(r.length)+' ('+pctStr+')', x0+6, y+(rowH-4)/2+7, '10px Segoe UI', '#475569');
+  });
+
+
+
+  // store hit-areas for tooltip
+  c._addrRegions=regions.map((r,i)=>({
+    r, y:mt+i*(rowH+gap), h:rowH-4,
+    x0:ml+(r.origin-minAddr)/span*pw,
+    bw:Math.max(r.length/span*pw,2)
+  }));
+}
+
+// ─── ② ROM vs RAM Bubble Chart ────────────────────────────────────────────────
+function bubbleChart(topN){
+  const c=document.getElementById('bubbleChart');if(!c)return;
+  const [ctx,w,h]=prep(c);
+  const allRows=DATA.scatter||[];
+  if(!allRows.length){
+    ctx.fillStyle='#94a3b8';ctx.font='14px Segoe UI';ctx.textAlign='center';
+    ctx.fillText('No module data.',w/2,h/2);return;
+  }
+  topN=Math.min(Math.max(+topN||100,1),allRows.length);
+  const rows=allRows.slice(0,topN);
+  document.getElementById('bubbleThresholdLabel').textContent=topN;
+  document.getElementById('bubbleCountLabel').textContent='of '+allRows.length+' module'+(allRows.length===1?'':'s');
+
+  const ml=60,mr=24,mt=20,mb=50,pw=w-ml-mr,ph=h-mt-mb;
+  const maxRom=Math.max(...rows.map(r=>r.rom),1);
+  const maxRam=Math.max(...rows.map(r=>r.ram),1);
+  const maxTotal=Math.max(...rows.map(r=>r.total),1);
+
+  // axes
+  ctx.strokeStyle='#e2e8f0';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(ml,mt);ctx.lineTo(ml,mt+ph);ctx.lineTo(ml+pw,mt+ph);ctx.stroke();
+  ctx.fillStyle='#94a3b8';ctx.font='10px Segoe UI';ctx.textAlign='center';
+  // x-axis ticks
+  for(let i=0;i<=4;i++){
+    const x=ml+i*pw/4;
+    ctx.fillText(fmt(maxRom*i/4),x,mt+ph+14);
+    ctx.beginPath();ctx.moveTo(x,mt+ph);ctx.lineTo(x,mt+ph+4);ctx.stroke();
+  }
+  // y-axis ticks
+  ctx.textAlign='right';
+  for(let i=0;i<=4;i++){
+    const y=mt+ph-i*ph/4;
+    ctx.fillText(fmt(maxRam*i/4),ml-6,y+4);
+    ctx.beginPath();ctx.moveTo(ml,y);ctx.lineTo(ml-4,y);ctx.stroke();
+  }
+  // axis labels
+  ctx.fillStyle='#334155';ctx.font='11px Segoe UI';ctx.textAlign='center';
+  ctx.fillText('ROM (Flash)',ml+pw/2,mt+ph+32);
+  ctx.save();ctx.translate(14,mt+ph/2);ctx.rotate(-Math.PI/2);
+  ctx.fillText('RAM',0,0);ctx.restore();
+
+  // bubbles
+  const bubbles=[];
+  const rowsMaxTotal=Math.max(...rows.map(r=>r.total),1);
+  rows.forEach((r,i)=>{
+    const x=ml+(r.rom/maxRom)*pw;
+    const y=mt+ph-(r.ram/maxRam)*ph;
+    const radius=Math.max(4,Math.sqrt(r.total/rowsMaxTotal)*28);
+    const col=CAT_COLORS[r.category]||COLORS[i%COLORS.length];
+    ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);
+    ctx.fillStyle=col+'99';ctx.fill();
+    ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.stroke();
+    bubbles.push({r,x,y,radius,col});
+  });
+
+  // labels for top 15
+  rows.slice(0,15).forEach((r,i)=>{
+    const bub=bubbles[i];
+    ctx.fillStyle='#1e293b';ctx.font='bold 9px Segoe UI';ctx.textAlign='center';
+    const labelText = String(r.name).split(/[\/\\]/).pop().slice(0,18);
+    
+    let labelY = bub.y - bub.radius - 3;
+    // If it goes above the top boundary, render it below the bubble
+    if (labelY < 12) {
+      labelY = bub.y + bub.radius + 10;
+    }
+    
+    let labelX = bub.x;
+    const tw = ctx.measureText(labelText).width;
+    // Prevent horizontal cutoff
+    if (labelX - tw/2 < ml) {
+      labelX = ml + tw/2;
+    } else if (labelX + tw/2 > w - mr) {
+      labelX = w - mr - tw/2;
+    }
+    
+    ctx.fillText(labelText, labelX, labelY);
+  });
+
+  c._bubbles=bubbles;
+}
+
+// ─── ③ Squarified Treemap ─────────────────────────────────────────────────────
+function squarify(items,x,y,w,h){
+  if(!items.length)return[];
+  if(items.length===1)return[{...items[0],x,y,w,h}];
+  const total=items.reduce((s,i)=>s+i.value,0);
+  // try horizontal split
+  let bestScore=Infinity,splitIdx=1,horizontal=true;
+  for(let horiz of[true,false]){
+    let acc=0;
+    for(let k=1;k<=items.length;k++){
+      acc+=items[k-1].value;
+      const rowFrac=acc/total;
+      const rowDim=horiz?h*rowFrac:w*rowFrac;
+      const crossDim=horiz?w:h;
+      let worst=0;
+      let s=0;
+      for(let j=0;j<k;j++){
+        s+=items[j].value;
+        const cellFrac=items[j].value/acc;
+        const cellDim=cellFrac*crossDim;
+        const ratio=Math.max(rowDim/cellDim,cellDim/rowDim);
+        if(ratio>worst)worst=ratio;
+      }
+      if(worst<bestScore){bestScore=worst;splitIdx=k;horizontal=horiz;}
+    }
+  }
+  const row=items.slice(0,splitIdx);
+  const rest=items.slice(splitIdx);
+  const rowValue=row.reduce((s,i)=>s+i.value,0);
+  const rowFrac=rowValue/total;
+  const placed=[];
+  if(horizontal){
+    const rowH=h*rowFrac;
+    let cx=x;
+    row.forEach(item=>{
+      const cw=w*(item.value/rowValue);
+      placed.push({...item,x:cx,y,w:cw,h:rowH});cx+=cw;
+    });
+    placed.push(...squarify(rest,x,y+rowH,w,h-rowH));
+  }else{
+    const rowW=w*rowFrac;
+    let cy=y;
+    row.forEach(item=>{
+      const ch=h*(item.value/rowValue);
+      placed.push({...item,x,y:cy,w:rowW,h:ch});cy+=ch;
+    });
+    placed.push(...squarify(rest,x+rowW,y,w-rowW,h));
+  }
+  return placed;
+}
+
+function treemap(){
+  const c=document.getElementById('treemapChart');if(!c)return;
+  const [ctx,w,h]=prep(c);
+  const rows=(DATA.treemap||[]);
+  if(!rows.length){
+    ctx.fillStyle='#94a3b8';ctx.font='14px Segoe UI';ctx.textAlign='center';
+    ctx.fillText('No module data.',w/2,h/2);return;
+  }
+  const items=rows.map(r=>({...r,value:r.total}));
+  const cells=squarify(items,0,0,w,h);
+  cells.forEach((cell,i)=>{
+    const col=CAT_COLORS[cell.category]||COLORS[i%COLORS.length];
+    ctx.fillStyle=col+'cc';
+    ctx.fillRect(cell.x,cell.y,cell.w-1,cell.h-1);
+    if(cell.w>30&&cell.h>18){
+      ctx.fillStyle='#fff';
+      ctx.font=`bold ${Math.min(12,Math.max(8,Math.floor(Math.min(cell.w,cell.h)/6)))}px Segoe UI`;
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      const label=String(cell.name).split(/[\/\\]/).pop();
+      const cx=cell.x+cell.w/2,cy=cell.y+cell.h/2;
+      ctx.fillText(label.slice(0,Math.floor(cell.w/6)),cx,cell.h>32?cy-7:cy);
+      if(cell.h>32){
+        ctx.font=`${Math.min(10,Math.max(7,Math.floor(Math.min(cell.w,cell.h)/7)))}px Segoe UI`;
+        ctx.fillStyle='rgba(255,255,255,.8)';
+        ctx.fillText(fmt(cell.total),cx,cy+8);
+      }
+    }
+  });
+  c._treeCells=cells;
+}
+
+// ─── ④ Section Donut Chart ────────────────────────────────────────────────────
+function donutChart(){
+  const c=document.getElementById('donutChart');if(!c)return;
+  const [ctx,w,h]=prep(c);
+  const rows=(DATA.donut||[]).filter(r=>r.total>0);
+  if(!rows.length){
+    ctx.fillStyle='#94a3b8';ctx.font='14px Segoe UI';ctx.textAlign='center';
+    ctx.fillText('No section data.',w/2,h/2);return;
+  }
+  const total=rows.reduce((s,r)=>s+r.total,0)||1;
+  const cx=w*0.42,cy=h/2;
+  const outerR=Math.min(cx,cy)*0.72;
+  const innerR=outerR*0.52;
+  const legendX=w*0.72,legendStartY=h*0.12;
+  const legendRowH=22;
+  let angle=-Math.PI/2;
+  const slices=[];
+  rows.forEach((r,i)=>{
+    const sweep=r.total/total*Math.PI*2;
+    const col=COLORS[i%COLORS.length];
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,outerR,angle,angle+sweep);
+    ctx.closePath();
+    ctx.fillStyle=col;ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+    slices.push({r,col,startAngle:angle,sweep,cx,cy,outerR,innerR});
+    angle+=sweep;
+  });
+  // inner hole
+  ctx.beginPath();ctx.arc(cx,cy,innerR,0,Math.PI*2);
+  ctx.fillStyle='#fff';ctx.fill();
+  // center label
+  ctx.fillStyle='#1e293b';ctx.font='bold 13px Segoe UI';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(fmt(total),cx,cy-8);
+  ctx.fillStyle='#64748b';ctx.font='10px Segoe UI';
+  ctx.fillText('total',cx,cy+8);
+  // legend
+  rows.slice(0,14).forEach((r,i)=>{
+    const col=COLORS[i%COLORS.length];
+    const ly=legendStartY+i*legendRowH;
+    ctx.fillStyle=col;ctx.fillRect(legendX,ly,12,12);
+    ctx.fillStyle='#334155';ctx.font='10px Segoe UI';ctx.textAlign='left';ctx.textBaseline='top';
+    const pctVal = (r.total / total) * 100;
+    const pctStr = pctVal < 0.01 && pctVal > 0 ? pctVal.toFixed(3) + '%' :
+                   pctVal < 0.1 && pctVal > 0 ? pctVal.toFixed(2) + '%' :
+                   pctVal.toFixed(1) + '%';
+    ctx.fillText(r.name.slice(0,18)+' '+pctStr,legendX+17,ly+1);
+  });
+  c._donutSlices=slices;
+}
+
+// ─── Tooltip helpers ──────────────────────────────────────────────────────────
+const TIP=document.getElementById('chart-tooltip');
+function showTip(html,e){TIP.innerHTML=html;TIP.style.display='block';moveTip(e);}
+function hideTip(){TIP.style.display='none';}
+function moveTip(e){
+  let x=e.clientX+14,y=e.clientY-10;
+  if(x+260>window.innerWidth)x=e.clientX-264;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
+}
+
+// ─── Canvas mouse events ──────────────────────────────────────────────────────
+function attachTooltip(canvasId,hitFn){
+  const c=document.getElementById(canvasId);if(!c)return;
+  c.addEventListener('mousemove',e=>{
+    const rect=c.getBoundingClientRect();
+    const mx=(e.clientX-rect.left)*(c.width/rect.width/window.devicePixelRatio);
+    const my=(e.clientY-rect.top)*(c.height/rect.height/window.devicePixelRatio);
+    const html=hitFn(mx,my,c);
+    if(html){showTip(html,e);}else{hideTip();}
+  });
+  c.addEventListener('mouseleave',hideTip);
+}
+
+function initTooltips(){
+  attachTooltip('addrSpaceChart',(mx,my,c)=>{
+    for(const {r,y,h,x0,bw} of (c._addrRegions||[])){
+      if(mx>=x0&&mx<=x0+bw&&my>=y&&my<=y+h){
+        const pct=r.length?Math.round(r.used/r.length*100):0;
+        let html = `<b>${r.name}</b><br>Origin: 0x${r.origin.toString(16).toUpperCase().padStart(8,'0')}<br>Size: ${fmt(r.length)}<br>Used: ${fmt(r.used)} (${pct}%)<br>Free: ${fmt(r.length-r.used)}<br>Attrs: ${r.attrs||'—'}`;
+        if(r.overflow){
+          html += `<br><span style="color:#ef4444;font-weight:bold;">⚠️ Overflowed by ${fmt(r.used-r.length)}</span>`;
+        }
+        if(r.overlaps && r.overlaps.length > 0){
+          html += `<br><span style="color:#f97316;font-weight:bold;">⚠️ Overlaps with: ${r.overlaps.join(', ')}</span>`;
+        }
+        if(r.section_overlaps && r.section_overlaps.length > 0){
+          html += `<br><span style="color:#f97316;font-weight:bold;">⚠️ Section overlap: ${r.section_overlaps.join(', ')}</span>`;
+        }
+        return html;
+      }
+    }
+    return null;
+  });
+
+  attachTooltip('bubbleChart',(mx,my,c)=>{
+    for(const {r,x,y,radius} of (c._bubbles||[]).slice().reverse()){
+      if(Math.hypot(mx-x,my-y)<=radius+3){
+        return `<b>${r.name}</b><br>Category: ${r.category}<br>ROM: ${fmt(r.rom)}<br>RAM: ${fmt(r.ram)}<br>Total: ${fmt(r.total)}`;
+      }
+    }
+    return null;
+  });
+
+  attachTooltip('treemapChart',(mx,my,c)=>{
+    for(const cell of (c._treeCells||[]).slice().reverse()){
+      if(mx>=cell.x&&mx<=cell.x+cell.w&&my>=cell.y&&my<=cell.y+cell.h){
+        return `<b>${cell.name}</b><br>Category: ${cell.category}<br>ROM: ${fmt(cell.rom)}<br>RAM: ${fmt(cell.ram)}<br>Total: ${fmt(cell.total)}`;
+      }
+    }
+    return null;
+  });
+
+  attachTooltip('donutChart',(mx,my,c)=>{
+    for(const {r,col,startAngle,sweep,cx,cy,outerR,innerR} of (c._donutSlices||[])){
+      const dx=mx-cx,dy=my-cy,dist=Math.hypot(dx,dy);
+      if(dist>=innerR&&dist<=outerR){
+        let ang=Math.atan2(dy,dx);
+        if(ang<startAngle-Math.PI/2)ang+=Math.PI*2;
+        const normStart=startAngle;
+        const normEnd=startAngle+sweep;
+        if(ang>=normStart&&ang<=normEnd){
+          const pct=(r.total/((DATA.donut||[]).reduce((s,x)=>s+x.total,0)||1)*100).toFixed(1);
+          return `<b>${r.name}</b><br>Size: ${fmt(r.total)}<br>Share: ${pct}%`;
+        }
+      }
+    }
+    return null;
+  });
+}
+
+// ─── Master redraw ────────────────────────────────────────────────────────────
+function redraw(){
+  barChart('romChart','rom');
+  barChart('ramChart','ram');
+  stack();
+  topCode();
+  addrSpace();
+  const bubbleSlider=document.getElementById('bubbleThreshold');
+  if(bubbleSlider){
+    const totalModules=(DATA.scatter||[]).length;
+    bubbleSlider.max=totalModules;
+    bubbleSlider.value=totalModules;
+    document.getElementById('bubbleThresholdLabel').textContent=totalModules;
+    bubbleSlider.addEventListener('input',function(){bubbleChart(this.value);});
+    document.getElementById('bubbleReset').addEventListener('click',function(){bubbleSlider.value=bubbleSlider.max;bubbleChart(bubbleSlider.max);});
+    bubbleChart(bubbleSlider.value);
+  }else bubbleChart();
+  treemap();
+  donutChart();
+}
+window.addEventListener('resize',redraw);
+redraw();
+initTooltips();
+
+// ─── Table filter / sort / tab logic ─────────────────────────────────────────
+function filterTable(id,q){q=(q||'').toLowerCase();document.querySelectorAll('#'+id+' tbody tr').forEach(r=>r.style.display=r.innerText.toLowerCase().includes(q)?'':'none');}
+document.querySelectorAll('input[data-filter]').forEach(inp=>inp.addEventListener('input',e=>filterTable(e.target.dataset.filter,e.target.value)));
+// Module tabs (scoped to .module-tabs container)
+document.querySelectorAll('.module-tabs .tab').forEach(b=>b.addEventListener('click',()=>{
+  const section=b.closest('section');
+  section.querySelectorAll('.module-tabs .tab').forEach(x=>x.classList.remove('active'));
+  section.querySelectorAll('.module-tabpane').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  document.getElementById(b.dataset.tab).classList.add('active');
+}));
+// Linker tabs (scoped to .linker-tabs container)
+document.querySelectorAll('.linker-tabs .tab').forEach(b=>b.addEventListener('click',()=>{
+  const section=b.closest('section');
+  section.querySelectorAll('.linker-tabs .tab').forEach(x=>x.classList.remove('active'));
+  section.querySelectorAll('.linker-tabpane').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  if(b.dataset.ltab) document.getElementById(b.dataset.ltab).classList.add('active');
+}));
+
+// Unit info tooltip (fixed positioning to escape sidebar overflow)
+(function(){
+  const icon = document.querySelector('.unit-info-icon');
+  const tip  = icon && icon.querySelector('.unit-tooltip');
+  if (!icon || !tip) return;
+  function place() {
+    const r = icon.getBoundingClientRect();
+    tip.style.top  = (r.top - tip.offsetHeight - 8) + 'px';
+    tip.style.left = Math.max(8, r.right - tip.offsetWidth) + 'px';
+  }
+  icon.addEventListener('mouseenter', () => { place(); });
+  window.addEventListener('resize', () => { if (tip.style.display !== 'none') place(); });
+})();
+document.querySelectorAll('th').forEach(th=>th.addEventListener('click',()=>{const table=th.closest('table'),idx=[...th.parentNode.children].indexOf(th),tbody=table.tBodies[0],rows=[...tbody.rows],asc=th.dataset.asc!=='1';th.dataset.asc=asc?'1':'0';rows.sort((a,b)=>{const av=a.cells[idx].dataset.sort||a.cells[idx].innerText,bv=b.cells[idx].dataset.sort||b.cells[idx].innerText,an=parseFloat(av),bn=parseFloat(bv);return !Number.isNaN(an)&&!Number.isNaN(bn)?(asc?an-bn:bn-an):(asc?av.localeCompare(bv):bv.localeCompare(av));});rows.forEach(r=>tbody.appendChild(r));}));
+
+// ─── Export images ─────────────────────────────────────────────────────────────
+function downloadBlob(dataUrl, filename) {
+  const a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function _filenameFromTitle(title) {
+  return title.replace(/[/\\?%*:|"<> ]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '') + '.png';
+}
+
+function exportContainer(btn) {
+  var container = btn.closest('.export-container');
+  if (!container) return;
+  var title = container.dataset.export || 'export';
+  var filename = _filenameFromTitle(title);
+  var canvas = container.querySelector('canvas');
+  if (canvas) {
+    var titleText = title;
+    var bg = document.createElement('canvas');
+    
+    var titleHeight = 50; // extra space for title at the top
+    var cssHeight = canvas.clientHeight || 0;
+    var pixelRatio = cssHeight > 0 ? (canvas.height / cssHeight) : (window.devicePixelRatio || 1);
+    if (isNaN(pixelRatio) || pixelRatio <= 0) pixelRatio = 1;
+    
+    var scaledTitleHeight = titleHeight * pixelRatio;
+    bg.width = canvas.width;
+    bg.height = canvas.height + scaledTitleHeight;
+    
+    var ctx = bg.getContext('2d');
+    
+    // Background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, bg.width, bg.height);
+    
+    // Draw Title Text
+    var fontSize = Math.round(15 * pixelRatio);
+    var fontSans = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+    ctx.fillStyle = '#1e293b'; // Slate 800
+    ctx.font = 'bold ' + fontSize + 'px ' + fontSans;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(titleText, 20 * pixelRatio, scaledTitleHeight / 2);
+    
+    // Draw a subtle divider line
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1 * pixelRatio;
+    ctx.beginPath();
+    ctx.moveTo(0, scaledTitleHeight - 0.5);
+    ctx.lineTo(bg.width, scaledTitleHeight - 0.5);
+    ctx.stroke();
+    
+    // Draw the chart canvas below the title
+    ctx.drawImage(canvas, 0, scaledTitleHeight);
+    
+    downloadBlob(bg.toDataURL('image/png'), filename);
+  } else {
+    exportCapacityCardCanvas(container, filename);
+  }
+}
+
+function exportCapacityCardCanvas(container, filename) {
+  var canvas = document.createElement('canvas');
+  var width = 460;
+  
+  // Get data from DOM
+  var titleEl = container.querySelector('h3');
+  var percentEl = container.querySelector('strong');
+  var infoTextEl = container.querySelector('.meter + p');
+  var items = container.querySelectorAll('ul li');
+  var noteEl = container.querySelector('.note');
+  
+  var title = titleEl ? titleEl.textContent.trim() : 'Capacity';
+  var percentText = percentEl ? percentEl.textContent.trim() : '0%';
+  var percentVal = parseFloat(percentText) || 0;
+  var infoText = infoTextEl ? infoTextEl.textContent.trim() : '';
+  
+  var itemH = 24;
+  var rows = Math.ceil(items.length / 2);
+  var noteHeight = noteEl ? 50 : 0;
+  var height = 120 + (rows * itemH) + noteHeight;
+  
+  var scale = 2; // High DPI export
+  canvas.width = width * scale;
+  canvas.height = height * scale;
+  
+  var ctx = canvas.getContext('2d');
+  ctx.scale(scale, scale);
+  
+  // Background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, width, height);
+  
+  // Border (optional, clean card-like border)
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(0.5, 0.5, width - 1, height - 1);
+  
+  // Fonts
+  var fontSans = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+  
+  // Draw Title
+  ctx.fillStyle = '#1e293b'; // Slate 800
+  ctx.font = 'bold 15px ' + fontSans;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.fillText(title, 20, 20);
+  
+  // Draw Percent
+  ctx.fillStyle = '#0284c7'; // Sky 600
+  ctx.font = 'bold 15px ' + fontSans;
+  ctx.textAlign = 'right';
+  ctx.fillText(percentText, width - 20, 20);
+  
+  // Draw Meter Bar
+  var meterY = 50;
+  var meterH = 12;
+  var meterW = width - 40;
+  
+  // Grey background
+  ctx.fillStyle = '#f1f5f9';
+  drawRoundedRect(ctx, 20, meterY, meterW, meterH, 6, true, false);
+  
+  // Filled part
+  if (percentVal > 0) {
+    var fillW = Math.min(meterW, meterW * (percentVal / 100));
+    var grad = ctx.createLinearGradient(20, 0, 20 + fillW, 0);
+    grad.addColorStop(0, '#0284c7');
+    grad.addColorStop(1, '#38bdf8');
+    ctx.fillStyle = grad;
+    drawRoundedRect(ctx, 20, meterY, fillW, meterH, 6, true, false);
+  }
+  
+  // Draw Info Text
+  ctx.fillStyle = '#475569'; // Slate 600
+  ctx.font = '13px ' + fontSans;
+  ctx.textAlign = 'left';
+  ctx.fillText(infoText, 20, 75);
+  
+  // Draw Category list
+  var startY = 105;
+  
+  for (var i = 0; i < items.length; i++) {
+    var li = items[i];
+    var labelEl = li.querySelector('b');
+    var valEl = li.querySelector('.size-val') || li.querySelector('span') || li;
+    var label = labelEl ? labelEl.textContent.trim() : '';
+    var val = valEl ? valEl.textContent.trim() : '';
+    if (labelEl && valEl === li) {
+      val = val.replace(label, '').trim();
+    }
+    
+    var col = i % 2;
+    var row = Math.floor(i / 2);
+    var x = col === 0 ? 20 : (width / 2) + 10;
+    var y = startY + (row * itemH);
+    var itemW = (width / 2) - 30;
+    
+    // Draw item dashed separator line
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.moveTo(x, y + 18);
+    ctx.lineTo(x + itemW, y + 18);
+    ctx.stroke();
+    ctx.setLineDash([]); // reset
+    
+    // Draw Label
+    ctx.fillStyle = '#64748b'; // Slate 500
+    ctx.font = 'bold 12px ' + fontSans;
+    ctx.textAlign = 'left';
+    ctx.fillText(label, x, y);
+    
+    // Draw Value
+    ctx.fillStyle = '#334155'; // Slate 700
+    ctx.font = '12px ' + fontSans;
+    ctx.textAlign = 'right';
+    ctx.fillText(val, x + itemW, y);
+  }
+  
+  // Draw note at the bottom
+  if (noteEl) {
+    var noteText = noteEl.textContent.trim();
+    ctx.fillStyle = '#94a3b8'; // Slate 400
+    ctx.font = 'italic 11px ' + fontSans;
+    ctx.textAlign = 'left';
+    
+    var noteY = startY + (rows * itemH) + 12;
+    
+    // Wrap note text if too long
+    var words = noteText.split(' ');
+    var line = '';
+    for (var n = 0; n < words.length; n++) {
+      var testLine = line + words[n] + ' ';
+      var metrics = ctx.measureText(testLine);
+      if (metrics.width > (width - 40) && n > 0) {
+        ctx.fillText(line, 20, noteY);
+        line = words[n] + ' ';
+        noteY += 14;
+      } else {
+        line = testLine;
+      }
+    }
+    ctx.fillText(line, 20, noteY);
+  }
+  
+  downloadBlob(canvas.toDataURL('image/png'), filename);
+}
+
+function drawRoundedRect(ctx, x, y, width, height, radius, fill, stroke) {
+  if (typeof radius === 'undefined') radius = 5;
+  if (typeof radius === 'number') {
+    radius = {tl: radius, tr: radius, br: radius, bl: radius};
+  }
+  ctx.beginPath();
+  ctx.moveTo(x + radius.tl, y);
+  ctx.lineTo(x + width - radius.tr, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
+  ctx.lineTo(x + width, y + height - radius.br);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
+  ctx.lineTo(x + radius.bl, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
+  ctx.lineTo(x, y + radius.tl);
+  ctx.quadraticCurveTo(x, y, x + radius.tl, y);
+  ctx.closePath();
+  if (fill) ctx.fill();
+  if (stroke) ctx.stroke();
+}
+
+function exportAll() {
+  var btn = document.querySelector('.export-btn-all');
+  var origText = '';
+  if (btn) {
+    if (btn.disabled) return;
+    btn.disabled = true;
+    origText = btn.innerHTML;
+    btn.innerHTML = '<span style="vertical-align:middle">⏳ Exporting...</span>';
+  }
+
+  var containers = document.querySelectorAll('.export-container');
+  var items = [];
+  containers.forEach(function(c) {
+    var title = c.dataset.export || 'export';
+    items.push({el: c, filename: _filenameFromTitle(title)});
+  });
+  if (items.length === 0) {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = origText;
+    }
+    return;
+  }
+  var i = 0;
+  function next() {
+    if (i >= items.length) {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = origText;
+      }
+      return;
+    }
+    var item = items[i++];
+    exportContainer(item.el.querySelector('.export-btn') || item.el);
+    setTimeout(next, 500);
+  }
+  next();
+}
+</script>
+</body></html>

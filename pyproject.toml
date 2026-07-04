@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=32", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openmapfileanalyzer"
+version = "0.1.0"
+description = "Python based linker map analyzer that generates a standalone HTML memory report"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = ["pyelftools>=0.29", "jinja2>=3.0"]
+license = { text = "MIT" }
+authors = [{ name = "Mapfile Analyzer" }]
+keywords = ["mapfile", "linker", "firmware", "analysis", "html-report"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Utilities",
+]
+
+[project.optional-dependencies]
+build = ["pyinstaller>=6.0"]
+chip-config = ["PyYAML>=6.0"]
+
+[project.scripts]
+openmapfileanalyzer = "openmapfileanalyzer:main"
+
+[tool.setuptools]
+py-modules = ["openmapfileanalyzer"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["analyzer*"]
+
+[tool.setuptools.package-data]
+analyzer = ["template.html"]
