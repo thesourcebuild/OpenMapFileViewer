@@ -39,24 +39,24 @@ The HTML report keeps the full dashboard layout:
 
 <table>
   <tr>
-    <td align="center"><img src="images/Flash_ROM_capacity.png" alt="ROM capacity" width="400"><br><em>ROM / Boot capacity</em></td>
-    <td align="center"><img src="images/RAM_capacity.png" alt="RAM capacity" width="400"><br><em>RAM capacity</em></td>
+    <td align="center"><img src="assets/images/Flash_ROM_capacity.png" alt="ROM capacity" width="400"><br><em>ROM / Boot capacity</em></td>
+    <td align="center"><img src="assets/images/RAM_capacity.png" alt="RAM capacity" width="400"><br><em>RAM capacity</em></td>
   </tr>
   <tr>
-    <td align="center"><img src="images/ROM_by_category.png" alt="ROM by category" width="400"><br><em>ROM by category</em></td>
-    <td align="center"><img src="images/RAM_by_category.png" alt="RAM by category" width="400"><br><em>RAM by category</em></td>
+    <td align="center"><img src="assets/images/ROM_by_category.png" alt="ROM by category" width="400"><br><em>ROM by category</em></td>
+    <td align="center"><img src="assets/images/RAM_by_category.png" alt="RAM by category" width="400"><br><em>RAM by category</em></td>
   </tr>
   <tr>
-    <td align="center"><img src="images/Category_composition.png" alt="Category composition" width="400"><br><em>Category composition</em></td>
-    <td align="center"><img src="images/Physical_address_space_map.png" alt="Address space map" width="400"><br><em>Physical address space map</em></td>
+    <td align="center"><img src="assets/images/Category_composition.png" alt="Category composition" width="400"><br><em>Category composition</em></td>
+    <td align="center"><img src="assets/images/Physical_address_space_map.png" alt="Address space map" width="400"><br><em>Physical address space map</em></td>
   </tr>
   <tr>
-    <td align="center"><img src="images/ROM_vs_RAM_bubble_chart.png" alt="ROM vs RAM bubble chart" width="400"><br><em>ROM vs RAM bubble chart</em></td>
-    <td align="center"><img src="images/Memory_treemap.png" alt="Memory treemap" width="400"><br><em>Memory treemap</em></td>
+    <td align="center"><img src="assets/images/ROM_vs_RAM_bubble_chart.png" alt="ROM vs RAM bubble chart" width="400"><br><em>ROM vs RAM bubble chart</em></td>
+    <td align="center"><img src="assets/images/Memory_treemap.png" alt="Memory treemap" width="400"><br><em>Memory treemap</em></td>
   </tr>
   <tr>
-    <td align="center"><img src="images/Linker_section_breakdown.png" alt="Linker section breakdown" width="400"><br><em>Linker section breakdown</em></td>
-    <td align="center"><img src="images/Largest_code_modules.png" alt="Largest code modules" width="400"><br><em>Largest code modules</em></td>
+    <td align="center"><img src="assets/images/Linker_section_breakdown.png" alt="Linker section breakdown" width="400"><br><em>Linker section breakdown</em></td>
+    <td align="center"><img src="assets/images/Largest_code_modules.png" alt="Largest code modules" width="400"><br><em>Largest code modules</em></td>
   </tr>
 </table>
 
