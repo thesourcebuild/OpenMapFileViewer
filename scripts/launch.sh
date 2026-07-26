@@ -10,4 +10,4 @@ if [ -z "$1" ]; then
     exit 0
 fi
 cmd=$(command -v python3 || command -v python)
-exec "$cmd" src/openmapfileanalyzer.py "$@"
+exec "$cmd" src/openmapfileviewer.py "$@"

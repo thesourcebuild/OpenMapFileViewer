@@ -3,7 +3,7 @@ requires = ["setuptools>=32", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "openmapfileanalyzer"
+name = "openmapfileviewer"
 version = "0.1.0"
 description = "Python based linker map analyzer that generates a standalone HTML memory report"
 readme = "README.md"
@@ -26,10 +26,10 @@ chip-config = ["PyYAML>=6.0"]
 section-rules = ["PyYAML>=6.0"]
 
 [project.scripts]
-openmapfileanalyzer = "openmapfileanalyzer:main"
+openmapfileviewer = "openmapfileviewer:main"
 
 [tool.setuptools]
-py-modules = ["openmapfileanalyzer", "version"]
+py-modules = ["openmapfileviewer", "version"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -37,3 +37,4 @@ include = ["analyzer*"]
 
 [tool.setuptools.package-data]
 analyzer = ["template.html"]
+

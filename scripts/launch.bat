@@ -12,4 +12,4 @@ echo.
 exit /b 0
 
 :run
-python src/openmapfileanalyzer.py %*
+python src/openmapfileviewer.py %*

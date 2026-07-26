@@ -15,7 +15,7 @@ Found a bug or have a feature request? Here's how to write a useful issue.
 What went wrong?
 
 ### Steps to reproduce
-1. Command: `python src/openmapfileanalyzer.py ...`
+1. Command: `python src/openmapfileviewer.py ...`
 2. Output / error message:
 
 ### Expected behavior
@@ -53,3 +53,4 @@ Any other approaches you've thought about.
 - Your **toolchain version** and **map format**
 
 Well-written issues get fixed faster.
+

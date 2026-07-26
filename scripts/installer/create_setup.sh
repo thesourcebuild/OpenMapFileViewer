@@ -18,7 +18,7 @@ echo "=== Installing dependencies ==="
 python3 -m pip install -e .[build]
 
 echo "=== Building standalone executable ==="
-pyinstaller scripts/installer/openmapfileanalyzer.spec --distpath out/linux/pyinstaller/dist --workpath out/linux/pyinstaller/build --clean
+pyinstaller scripts/installer/openmapfileviewer.spec --distpath out/linux/pyinstaller/dist --workpath out/linux/pyinstaller/build --clean
 
 echo "=== Done ==="
-echo "Linux binary: $(pwd)/out/linux/pyinstaller/dist/openmapfileanalyzer"
+echo "Linux binary: $(pwd)/out/linux/pyinstaller/dist/openmapfileviewer"

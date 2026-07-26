@@ -1,10 +1,10 @@
-# OpenMapFileAnalyzer
+# OpenMapFileViewer
 
 A standalone Python utility for firmware memory analysis. It parses linker map files from major toolchains—including GCC/Clang, IAR, and Keil—and generates a comprehensive, single-file HTML report detailing memory regions, section composition, and symbol statistics.
 
 ## Table of Contents
 
-- [OpenMapFileAnalyzer](#openmapfileanalyzer)
+- [OpenMapFileViewer](#openmapfileviewer)
   - [Table of Contents](#table-of-contents)
   - [Report sections](#report-sections)
   - [Screenshots](#screenshots)
@@ -89,36 +89,36 @@ pip install -e .
 After installing with `pip install -e .`, run the analyzer as:
 
 ```bash
-openmapfileanalyzer firmware.map -o firmware_report.html
-openmapfileanalyzer firmware.map --linker-file lscript.ld
-openmapfileanalyzer firmware.elf -o firmware_report.html
+openmapfileviewer firmware.map -o firmware_report.html
+openmapfileviewer firmware.map --linker-file lscript.ld
+openmapfileviewer firmware.elf -o firmware_report.html
 
-openmapfileanalyzer firmware.map --markdown
-openmapfileanalyzer firmware.map --json firmware_report.json
-openmapfileanalyzer firmware.map --csv
+openmapfileviewer firmware.map --markdown
+openmapfileviewer firmware.map --json firmware_report.json
+openmapfileviewer firmware.map --csv
 
-openmapfileanalyzer firmware.map --rom-capacity 2MiB --ram-capacity 512KiB
-openmapfileanalyzer firmware.map --rom-capacity 0x200000 --ram-capacity 0x80000
-openmapfileanalyzer firmware.map --section-rules samples/section_rules.yaml
+openmapfileviewer firmware.map --rom-capacity 2MiB --ram-capacity 512KiB
+openmapfileviewer firmware.map --rom-capacity 0x200000 --ram-capacity 0x80000
+openmapfileviewer firmware.map --section-rules samples/section_rules.yaml
 ```
 
 Or run directly from source:
 
 ```bash
-python src/openmapfileanalyzer.py firmware.map -o firmware_report.html
+python src/openmapfileviewer.py firmware.map -o firmware_report.html
 ```
 
 Parser profile selection is optional:
 
 ```bash
-openmapfileanalyzer firmware.map --map-format auto
-openmapfileanalyzer firmware.map --map-format gnu
-openmapfileanalyzer firmware.map --map-format keil
-openmapfileanalyzer firmware.map --map-format arm
-openmapfileanalyzer firmware.map --map-format iar
-openmapfileanalyzer firmware.map --map-format ti
-openmapfileanalyzer firmware.map --map-format msvc
-openmapfileanalyzer firmware.map --map-format generic
+openmapfileviewer firmware.map --map-format auto
+openmapfileviewer firmware.map --map-format gnu
+openmapfileviewer firmware.map --map-format keil
+openmapfileviewer firmware.map --map-format arm
+openmapfileviewer firmware.map --map-format iar
+openmapfileviewer firmware.map --map-format ti
+openmapfileviewer firmware.map --map-format msvc
+openmapfileviewer firmware.map --map-format generic
 ```
 
 **Binary ELF Files**: You can pass binary ELF files (`.elf`, `.axf`, `.o`) directly instead of text map files. The analyzer leverages `pyelftools` to parse the `.symtab` section and extract `STT_FILE`, `STT_FUNC`, and `STT_OBJECT` symbol sizes natively without relying on map text layout.
@@ -143,18 +143,18 @@ The `samples/` directory contains pre-generated linker map files for various too
 
 | Toolchain | Target | Command | Source command |
 |-----------|--------|---------|---------------|
-| Keil | STM32F103RB | `openmapfileanalyzer "samples/keil/openlibcli_stm32f103rbtx.map" --linker-file "samples/keil/openlibcli_stm32f103rbtx.sct"` | `python src/openmapfileanalyzer.py "samples/keil/openlibcli_stm32f103rbtx.map" --linker-file "samples/keil/openlibcli_stm32f103rbtx.sct"` |
-| STM32CubeIDE | STM32F103RB | `openmapfileanalyzer "samples/gcc/cubeide/openlibcli_stm32f103rbtx.map" --linker-file "samples/gcc/cubeide/STM32F103RBTX_FLASH.ld"` | `python src/openmapfileanalyzer.py "samples/gcc/cubeide/openlibcli_stm32f103rbtx.map" --linker-file "samples/gcc/cubeide/STM32F103RBTX_FLASH.ld"` |
-| IAR | STM32F103RB | `openmapfileanalyzer "samples/iar/openlibcli_stm32f103rbtx.map" --linker-file "samples/iar/stm32f103xb_flash.icf"` | `python src/openmapfileanalyzer.py "samples/iar/openlibcli_stm32f103rbtx.map" --linker-file "samples/iar/stm32f103xb_flash.icf"` |
-| ESP32 (IDF) | ESP32 | `openmapfileanalyzer "samples/gcc/esp32/openlibcli_esp32.map"` | `python src/openmapfileanalyzer.py "samples/gcc/esp32/openlibcli_esp32.map"` |
-| Pico SDK | RP2350 | `openmapfileanalyzer "samples/gcc/pico/openlibcli_rp2350.map"` | `python src/openmapfileanalyzer.py "samples/gcc/pico/openlibcli_rp2350.map"` |
+| Keil | STM32F103RB | `openmapfileviewer "samples/keil/openlibcli_stm32f103rbtx.map" --linker-file "samples/keil/openlibcli_stm32f103rbtx.sct"` | `python src/openmapfileviewer.py "samples/keil/openlibcli_stm32f103rbtx.map" --linker-file "samples/keil/openlibcli_stm32f103rbtx.sct"` |
+| STM32CubeIDE | STM32F103RB | `openmapfileviewer "samples/gcc/cubeide/openlibcli_stm32f103rbtx.map" --linker-file "samples/gcc/cubeide/STM32F103RBTX_FLASH.ld"` | `python src/openmapfileviewer.py "samples/gcc/cubeide/openlibcli_stm32f103rbtx.map" --linker-file "samples/gcc/cubeide/STM32F103RBTX_FLASH.ld"` |
+| IAR | STM32F103RB | `openmapfileviewer "samples/iar/openlibcli_stm32f103rbtx.map" --linker-file "samples/iar/stm32f103xb_flash.icf"` | `python src/openmapfileviewer.py "samples/iar/openlibcli_stm32f103rbtx.map" --linker-file "samples/iar/stm32f103xb_flash.icf"` |
+| ESP32 (IDF) | ESP32 | `openmapfileviewer "samples/gcc/esp32/openlibcli_esp32.map"` | `python src/openmapfileviewer.py "samples/gcc/esp32/openlibcli_esp32.map"` |
+| Pico SDK | RP2350 | `openmapfileviewer "samples/gcc/pico/openlibcli_rp2350.map"` | `python src/openmapfileviewer.py "samples/gcc/pico/openlibcli_rp2350.map"` |
 
 Sample chip configuration YAML files are also available in `samples/chip-configs/`:
 
 ```
-openmapfileanalyzer <map_file> --chip-config samples/chip-configs/stm32f103.yaml
-openmapfileanalyzer <map_file> --chip-config samples/chip-configs/esp32.yaml
-openmapfileanalyzer <map_file> --chip-config samples/chip-configs/zynq.yaml
+openmapfileviewer <map_file> --chip-config samples/chip-configs/stm32f103.yaml
+openmapfileviewer <map_file> --chip-config samples/chip-configs/esp32.yaml
+openmapfileviewer <map_file> --chip-config samples/chip-configs/zynq.yaml
 ```
 
 Chip config samples demonstrate three supported YAML schemas (see [Docs/chip_config_yaml.md](Docs/chip_config_yaml.md) for details).
@@ -171,10 +171,10 @@ If you wish to distribute the analyzer as a standalone executable without relyin
 
    ```bash
    pip install .[build]
-   pyinstaller scripts/installer/openmapfileanalyzer.spec --distpath out/pyinstaller/dist --workpath out/pyinstaller/build
+   pyinstaller scripts/installer/openmapfileviewer.spec --distpath out/pyinstaller/dist --workpath out/pyinstaller/build
    ```
 
-3. The executable will be generated in `out/pyinstaller/dist/openmapfileanalyzer.exe` (or `openmapfileanalyzer` on Linux/macOS).
+3. The executable will be generated in `out/pyinstaller/dist/openmapfileviewer.exe` (or `openmapfileviewer` on Linux/macOS).
 
 ## Contributions
 
@@ -201,4 +201,6 @@ MIT License — see ['LICENSE'](LICENSE) file.
 Muhammad Hassaan Shah
 
 - GitHub: [@thesourcebuild](https://github.com/thesourcebuild)
-- Project: [github.com/thesourcebuild/OpenMapFileVisualizer](https://github.com/thesourcebuild/OpenMapFileVisualizer)
+- Project: [github.com/thesourcebuild/OpenMapFileViewer
+](https://github.com/thesourcebuild/OpenMapFileViewer
+)

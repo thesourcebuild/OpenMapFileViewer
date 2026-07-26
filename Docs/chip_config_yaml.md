@@ -142,7 +142,7 @@ Supported operators: `+`, `-`, `*`, `/` (floor), `//` (floor), `%`, `(`, `)`.
 ## Usage
 
 ```bash
-python src/openmapfileanalyzer.py firmware.map --chip-config my_chip.yaml -o report.html
+python src/openmapfileviewer.py firmware.map --chip-config my_chip.yaml -o report.html
 ```
 
 When `--chip-config` is active, the YAML-defined regions completely replace any regions parsed from the map file or linker script. The `--rom-capacity` and `--ram-capacity` CLI flags still take precedence if set.
@@ -152,7 +152,8 @@ When `--chip-config` is active, the YAML-defined regions completely replace any 
 Schema B is compatible with ESP-IDF's `chip_info/*.yaml` format. You can use the files bundled with `esp_idf_size` directly:
 
 ```bash
-python src/openmapfileanalyzer.py build/your_project.map --chip-config "$(python -c "import esp_idf_size, os; print(os.path.join(os.path.dirname(esp_idf_size.__file__), 'chip_info', 'esp32.yaml'))")"
+python src/openmapfileviewer.py build/your_project.map --chip-config "$(python -c "import esp_idf_size, os; print(os.path.join(os.path.dirname(esp_idf_size.__file__), 'chip_info', 'esp32.yaml'))")"
 ```
 
 The tool will automatically detect the ESP-IDF format and apply it, with `kind` inferred from memory type names.
+

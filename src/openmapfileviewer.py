@@ -12,18 +12,18 @@ Supported best-effort formats:
   - IAR-style map files containing section/module summaries
 
 Usage:
-  python src/openmapfileanalyzer.py firmware.map -o report.html
-  python src/openmapfileanalyzer.py firmware.map -o report.html --json report.json
-  python src/openmapfileanalyzer.py firmware.map --csv
-  python src/openmapfileanalyzer.py firmware.map --top 100 --min-size 16
-  python src/openmapfileanalyzer.py firmware.map --linker-file lscript.ld
-  python src/openmapfileanalyzer.py firmware.map --section-rules section_rules.yaml
-  python src/openmapfileanalyzer.py firmware.map --format auto
-  python src/openmapfileanalyzer.py firmware.map --format gnu
-  python src/openmapfileanalyzer.py firmware.map --format keil
-  python src/openmapfileanalyzer.py firmware.map --format iar
-  python src/openmapfileanalyzer.py firmware.map --format ti
-  python src/openmapfileanalyzer.py firmware.map --format msvc
+  python src/openmapfileviewer.py firmware.map -o report.html
+  python src/openmapfileviewer.py firmware.map -o report.html --json report.json
+  python src/openmapfileviewer.py firmware.map --csv
+  python src/openmapfileviewer.py firmware.map --top 100 --min-size 16
+  python src/openmapfileviewer.py firmware.map --linker-file lscript.ld
+  python src/openmapfileviewer.py firmware.map --section-rules section_rules.yaml
+  python src/openmapfileviewer.py firmware.map --format auto
+  python src/openmapfileviewer.py firmware.map --format gnu
+  python src/openmapfileviewer.py firmware.map --format keil
+  python src/openmapfileviewer.py firmware.map --format iar
+  python src/openmapfileviewer.py firmware.map --format ti
+  python src/openmapfileviewer.py firmware.map --format msvc
 """
 from __future__ import annotations
 
@@ -212,3 +212,4 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

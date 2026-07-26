@@ -1,4 +1,4 @@
-# Sample custom classification rules for OpenMapFileAnalyzer.
+# Sample custom classification rules for openmapfileviewer.
 #
 # This file mirrors the built-in defaults in src/analyzer/section_rules.py,
 # but uses a user-friendly YAML shape that can be edited to add or extend

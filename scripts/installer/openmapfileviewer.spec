@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['../../src/openmapfileanalyzer.py'],
+    ['../../src/openmapfileviewer.py'],
     pathex=[],
     binaries=[],
     datas=[
@@ -25,13 +25,14 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='openmapfileanalyzer',
+    name='openmapfileviewer',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
+    icon='../../images/openmapfileviewer.ico',
     console=True,
     disable_windowed_traceback=False,
     argv_emulation=False,
@@ -39,3 +40,4 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
 )
+
