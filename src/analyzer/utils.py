@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 import re
 
-from .section_rules import SECTION_RULES, REGION_KIND_RULES
+from .section_rules import DEFAULT_RULES, RulesConfig
 
 SIZE_SUFFIXES = {
     "k": 1024,
@@ -58,23 +58,25 @@ def nice_size(n: int) -> str:
     return result
 
 
-def section_class(section: str) -> str:
+def section_class(section: str, rules: RulesConfig | None = None) -> str:
+    active_rules = rules or DEFAULT_RULES
+    section_rules = active_rules.section_rules
     s = (section or "").strip()
     sl = s.lower()
     compact = sl.replace(" ", "")
 
     # Try keyword matching first
-    for category, keywords in SECTION_RULES["keywords"].items():
+    for category, keywords in section_rules["keywords"].items():
         if compact in keywords:
             return category
 
     # Try prefix matching
-    for name, prefixes in SECTION_RULES["prefixes"]:
+    for name, prefixes in section_rules["prefixes"]:
         if any(sl == prefix.lower() or sl.startswith(prefix.lower()) for prefix in prefixes):
             return name
 
     # Try suffix matching
-    for name, suffixes in SECTION_RULES["suffixes"]:
+    for name, suffixes in section_rules["suffixes"]:
         if any(sl.endswith(suffix) for suffix in suffixes):
             return name
 
@@ -128,12 +130,19 @@ def source_file(source: str) -> str:
     return re.sub(r"\.(?:o|obj)\)?$", ".c", base, flags=re.I)
 
 
-def region_kind(name: str, attrs: str = "", origin: int = 0, length: int = 0) -> str:
+def region_kind(
+    name: str,
+    attrs: str = "",
+    origin: int = 0,
+    length: int = 0,
+    rules: RulesConfig | None = None,
+) -> str:
+    active_rules = rules or DEFAULT_RULES
     lowered = (name or "").lower()
 
     # Check keyword matching
-    for kind, rules in REGION_KIND_RULES.items():
-        if any(t in lowered for t in rules["keywords"]):
+    for kind, kind_rules in active_rules.region_kind_rules.items():
+        if any(t in lowered for t in kind_rules.get("keywords", ())):
             return kind
 
     # Check attribute matching
@@ -147,5 +156,8 @@ def region_kind(name: str, attrs: str = "", origin: int = 0, length: int = 0) ->
     elif "x" in attrs_lower or "r" in attrs_lower:
         return "flash"
 
-    return "other"
+    for kind, kind_rules in active_rules.region_kind_rules.items():
+        if any(t in attrs_lower for t in kind_rules.get("attributes", ())):
+            return kind
 
+    return "other"

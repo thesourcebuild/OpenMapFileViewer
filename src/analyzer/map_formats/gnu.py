@@ -4,6 +4,7 @@ import re
 from typing import Sequence
 
 from ..models import Analysis, Contribution, MemoryRegion
+from ..section_rules import RulesConfig
 from ..utils import normalize_source, parse_int, section_class
 from .base import append_hint
 
@@ -98,7 +99,12 @@ def resolve_symbols(
             )
 
 
-def parse(lines: Sequence[str], analysis: Analysis, min_size: int = 0) -> None:
+def parse(
+    lines: Sequence[str],
+    analysis: Analysis,
+    min_size: int = 0,
+    rules: RulesConfig | None = None,
+) -> None:
     in_memory = False
     current_section = ""
     seen_memory_header = False
@@ -170,7 +176,7 @@ def parse(lines: Sequence[str], analysis: Analysis, min_size: int = 0) -> None:
                     addr,
                     size,
                     source,
-                    kind=section_class(current_section),
+                    kind=section_class(current_section, rules=rules),
                     line_no=pending_line_no,
                 )
                 pending_section = None
@@ -195,7 +201,7 @@ def parse(lines: Sequence[str], analysis: Analysis, min_size: int = 0) -> None:
                 addr,
                 size,
                 source,
-                kind=section_class(current_section),
+                kind=section_class(current_section, rules=rules),
                 line_no=line_no,
             )
             continue
@@ -217,7 +223,7 @@ def parse(lines: Sequence[str], analysis: Analysis, min_size: int = 0) -> None:
                 addr,
                 size,
                 source,
-                kind=section_class(sec_name),
+                kind=section_class(sec_name, rules=rules),
                 line_no=line_no,
             )
             continue
@@ -238,7 +244,7 @@ def parse(lines: Sequence[str], analysis: Analysis, min_size: int = 0) -> None:
                 addr,
                 size,
                 source,
-                kind=section_class(current_section),
+                kind=section_class(current_section, rules=rules),
                 line_no=line_no,
             )
             continue

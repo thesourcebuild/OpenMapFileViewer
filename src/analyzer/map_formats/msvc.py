@@ -4,6 +4,7 @@ import re
 from typing import Sequence
 
 from ..models import Analysis, Contribution
+from ..section_rules import RulesConfig
 from ..utils import parse_int, section_class
 
 FORMAT_NAME = "msvc"
@@ -20,7 +21,12 @@ def can_parse(text: str) -> bool:
     return "preferred load address is" in sample and "publics by value" in sample
 
 
-def parse(lines: Sequence[str], analysis: Analysis, min_size: int = 0) -> None:
+def parse(
+    lines: Sequence[str],
+    analysis: Analysis,
+    min_size: int = 0,
+    rules: RulesConfig | None = None,
+) -> None:
     for line_no, line in enumerate(lines, 1):
         match = MSVC_SECTION_RE.match(line)
         if not match:
@@ -29,5 +35,5 @@ def parse(lines: Sequence[str], analysis: Analysis, min_size: int = 0) -> None:
         size = parse_int(match.group("size"), default_base=16)
         if size >= min_size and size > 0:
             analysis.contributions.append(
-                Contribution(section, None, size, "<section total>", kind=section_class(match.group("class")), line_no=line_no)
+                Contribution(section, None, size, "<section total>", kind=section_class(match.group("class"), rules=rules), line_no=line_no)
             )

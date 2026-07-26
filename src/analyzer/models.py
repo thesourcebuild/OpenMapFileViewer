@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
+from .section_rules import RulesConfig
+
 
 @dataclass
 class Contribution:
@@ -41,6 +43,7 @@ class StackUsageEntry:
 class Analysis:
     input_file: str
     generated_at: str
+    rules: Optional[RulesConfig] = None
     format_hints: List[str] = field(default_factory=list)
     memory_regions: List[MemoryRegion] = field(default_factory=list)
     contributions: List[Contribution] = field(default_factory=list)

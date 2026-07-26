@@ -5,6 +5,7 @@ import re
 from typing import Sequence
 
 from ..models import Analysis, Contribution, MemoryRegion
+from ..section_rules import RulesConfig
 from ..utils import section_class
 from .base import append_hint
 
@@ -30,7 +31,12 @@ def can_parse(text: str) -> bool:
     )
 
 
-def parse(lines: Sequence[str], analysis: Analysis, min_size: int = 0) -> None:
+def parse(
+    lines: Sequence[str],
+    analysis: Analysis,
+    min_size: int = 0,
+    rules: RulesConfig | None = None,
+) -> None:
     # Modern IAR placement summary regexes
     IAR_PLACEMENT_RE = re.compile(
         r"^\s{2,4}(?P<section>[\w. \x24#-]+?)\s{2,}(?:(?P<kind>inited|zero|ro\s+code|const|uninit)\s+)?(?P<addr>0x[0-9a-fA-F\x27]+)\s+(?:(?P<align>\d+|--)\s+)?(?P<size>0x[0-9a-fA-F]+)\s+(?P<object>.+?)(?:\s+\[\d+\])?\s*$"
@@ -141,7 +147,7 @@ def parse(lines: Sequence[str], analysis: Analysis, min_size: int = 0) -> None:
                 if "stack" in sec_lower or "heap" in sec_lower:
                     kind = "bss"
                 else:
-                    kind = section_class(section)
+                    kind = section_class(section, rules=rules)
 
             analysis.contributions.append(
                 Contribution(
@@ -169,7 +175,7 @@ def parse(lines: Sequence[str], analysis: Analysis, min_size: int = 0) -> None:
                 size = int(match.group(key))
                 if size >= min_size and size > 0:
                     analysis.contributions.append(
-                        Contribution(section, None, size, module, kind=section_class(section), line_no=line_no)
+                        Contribution(section, None, size, module, kind=section_class(section, rules=rules), line_no=line_no)
                     )
             continue
 
@@ -179,6 +185,5 @@ def parse(lines: Sequence[str], analysis: Analysis, min_size: int = 0) -> None:
             size = int(match.group("size"))
             if size >= min_size and size > 0:
                 analysis.contributions.append(
-                    Contribution(section, None, size, match.group("module"), kind=section_class(section), line_no=line_no)
+                    Contribution(section, None, size, match.group("module"), kind=section_class(section, rules=rules), line_no=line_no)
                 )
-

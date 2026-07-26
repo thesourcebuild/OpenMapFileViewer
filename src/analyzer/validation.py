@@ -3,10 +3,14 @@ from __future__ import annotations
 from typing import Any, Dict, List, Tuple
 
 from .models import Analysis
+from .section_rules import RulesConfig
 from .utils import nice_size
 
 
-def detect_layout_issues(analysis: Analysis) -> Tuple[List[str], Dict[str, Any]]:
+def detect_layout_issues(
+    analysis: Analysis,
+    rules: RulesConfig | None = None,
+) -> Tuple[List[str], Dict[str, Any]]:
     """
     Analyzes memory regions and section contributions to detect layout issues:
     1. Overlapping physical memory regions.
@@ -64,13 +68,14 @@ def detect_layout_issues(analysis: Analysis) -> Tuple[List[str], Dict[str, Any]]
     # 3. Detect overlapping output sections
     # Find bounding box (start and end) for each distinct section name
     from .utils import section_class
+    active_rules = rules or analysis.rules
     section_bounds: Dict[str, List[int]] = {}
     for c in analysis.contributions:
         if c.address is None or c.size <= 0 or c.source == "<region total>":
             continue
         sec = c.section
         # Skip debug/non-allocated sections to avoid false positive overlap warnings
-        if section_class(sec) == "debug":
+        if section_class(sec, rules=active_rules) == "debug":
             continue
         start = c.address
         end = c.address + c.size
@@ -94,7 +99,7 @@ def detect_layout_issues(analysis: Analysis) -> Tuple[List[str], Dict[str, Any]]
         if c.address is None or c.size <= 0 or c.source == "<region total>":
             continue
         # Skip non-allocated sections (debug, metadata, etc. - not loaded into memory)
-        kind = c.kind or section_class(c.section)
+        kind = c.kind or section_class(c.section, rules=active_rules)
         if kind == "debug":
             continue
         valid_contribs.append(c)

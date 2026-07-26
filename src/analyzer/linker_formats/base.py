@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Protocol, Sequence
 
 from ..models import MemoryRegion
+from ..section_rules import RulesConfig
 from ..utils import region_kind
 
 
@@ -51,18 +52,21 @@ def detect_linker_format(text: str) -> str:
     return parser.FORMAT_NAME if parser is not None else "generic"
 
 
-def filter_contained_regions(regions: Sequence[MemoryRegion]) -> list[MemoryRegion]:
+def filter_contained_regions(
+    regions: Sequence[MemoryRegion],
+    rules: RulesConfig | None = None,
+) -> list[MemoryRegion]:
     ordered = sorted(enumerate(regions), key=lambda item: (-item[1].length, item[1].origin, item[0]))
     kept: list[tuple[int, MemoryRegion]] = []
     for index, region in ordered:
         if region.length <= 0:
             continue
         end = region.origin + region.length
-        r_kind = region_kind(region.name, region.attrs, region.origin, region.length)
+        r_kind = region_kind(region.name, region.attrs, region.origin, region.length, rules=rules)
         if any(
             existing.origin <= region.origin
             and (existing.origin + existing.length) >= end
-            and region_kind(existing.name, existing.attrs, existing.origin, existing.length) == r_kind
+            and region_kind(existing.name, existing.attrs, existing.origin, existing.length, rules=rules) == r_kind
             for _, existing in kept
         ):
             continue
@@ -71,7 +75,10 @@ def filter_contained_regions(regions: Sequence[MemoryRegion]) -> list[MemoryRegi
     return [region for _, region in kept]
 
 
-def parse_linker_file(path: Path) -> tuple[str, list[MemoryRegion], dict]:
+def parse_linker_file(
+    path: Path,
+    rules: RulesConfig | None = None,
+) -> tuple[str, list[MemoryRegion], dict]:
     text = path.read_text(errors="replace")
     parser = get_parser_for_path(path) or detect_linker_parser(text)
     if parser is None:
@@ -82,4 +89,4 @@ def parse_linker_file(path: Path) -> tuple[str, list[MemoryRegion], dict]:
         regions, extras = result
     else:
         regions, extras = result, {}
-    return parser.FORMAT_NAME, filter_contained_regions(regions), extras
+    return parser.FORMAT_NAME, filter_contained_regions(regions, rules=rules), extras

@@ -10,7 +10,7 @@ from typing import Any, Dict, List
 import jinja2
 
 from .models import Analysis, Contribution, MemoryRegion
-from .section_rules import MODULE_CLASS_RULES
+from .section_rules import DEFAULT_RULES, RulesConfig
 from .stats import build_module_rows, compute_stats
 from .utils import nice_size, object_name, region_kind as shared_region_kind
 
@@ -23,10 +23,11 @@ def size_with_hex(value: int) -> str:
     return f"{nice_size(value)} (0x{value:X})"
 
 
-def classify_module(name: str) -> str:
+def classify_module(name: str, rules: RulesConfig | None = None) -> str:
     """Small, transparent embedded-oriented grouping used only for dashboard views."""
+    active_rules = rules or DEFAULT_RULES
     lowered = (name or "").lower()
-    for category, keywords in MODULE_CLASS_RULES.items():
+    for category, keywords in active_rules.module_class_rules.items():
         if any(t in lowered for t in keywords):
             return category
     return "Other"
@@ -62,8 +63,10 @@ def render_html(
     top: int = 80,
     rom_capacity: int | None = None,
     ram_capacity: int | None = None,
+    rules: RulesConfig | None = None,
 ) -> str:
-    stats = compute_stats(analysis)
+    active_rules = rules or analysis.rules
+    stats = compute_stats(analysis, rules=active_rules)
     total = int(stats["total_bytes"])
     by_class = stats["by_class"]
     by_section = stats["by_section"]
@@ -87,7 +90,7 @@ def render_html(
 
     # --- Region classification ---
     region_kind = lambda r: r.kind or shared_region_kind(
-        r.name, r.attrs, r.origin, r.length
+        r.name, r.attrs, r.origin, r.length, rules=active_rules
     )
 
     flash_regions = [r for r in analysis.memory_regions if region_kind(r) == "flash"]
@@ -242,7 +245,7 @@ def render_html(
     # --- Memory region rows ---
     from .validation import detect_layout_issues
 
-    _, region_issues = detect_layout_issues(analysis)
+    _, region_issues = detect_layout_issues(analysis, rules=active_rules)
 
     def get_region_status(r_name: str) -> str:
         issues = region_issues.get(r_name, {})
@@ -269,7 +272,7 @@ def render_html(
     module_rows = build_module_rows(by_object)
     tag_ids: Dict[str, int] = {}
     for row in module_rows:
-        cat = classify_module(str(row.get("name", "")))
+        cat = classify_module(str(row.get("name", "")), rules=active_rules)
         row["category"] = cat
         tag_ids.setdefault(cat, len(tag_ids) % 8)
         row["tag_id"] = tag_ids[cat]
@@ -496,8 +499,10 @@ def render_markdown(
     analysis: Analysis,
     rom_capacity: int | None = None,
     ram_capacity: int | None = None,
+    rules: RulesConfig | None = None,
 ) -> str:
-    stats = compute_stats(analysis)
+    active_rules = rules or analysis.rules
+    stats = compute_stats(analysis, rules=active_rules)
     by_class = stats["by_class"]
 
     class_totals = defaultdict(int)
@@ -514,7 +519,7 @@ def render_markdown(
     ram_runtime = rwdata + bss
 
     region_kind = lambda r: r.kind or shared_region_kind(
-        r.name, r.attrs, r.origin, r.length
+        r.name, r.attrs, r.origin, r.length, rules=active_rules
     )
 
     flash_regions = [

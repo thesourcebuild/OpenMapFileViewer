@@ -5,22 +5,28 @@ from dataclasses import asdict
 from typing import Callable, Dict, Iterable, List
 
 from .models import Analysis, Contribution
+from .section_rules import RulesConfig
 from .utils import archive_name, object_name, section_class, source_file
 
 
-def aggregate(contribs: Iterable[Contribution], key_func: Callable[[Contribution], str]) -> List[Dict[str, object]]:
+def aggregate(
+    contribs: Iterable[Contribution],
+    key_func: Callable[[Contribution], str],
+    rules: RulesConfig | None = None,
+) -> List[Dict[str, object]]:
     totals: Dict[str, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
     for contribution in contribs:
         key = key_func(contribution)
         totals[key]["total"] += contribution.size
-        totals[key][contribution.kind or section_class(contribution.section)] += contribution.size
+        totals[key][contribution.kind or section_class(contribution.section, rules=rules)] += contribution.size
 
     rows = [{"name": name, **parts} for name, parts in totals.items()]
     rows.sort(key=lambda row: int(row.get("total", 0)), reverse=True)
     return rows
 
 
-def compute_stats(analysis: Analysis) -> Dict[str, object]:
+def compute_stats(analysis: Analysis, rules: RulesConfig | None = None) -> Dict[str, object]:
+    active_rules = rules or analysis.rules
     all_contribs = [
         contribution
         for contribution in analysis.contributions
@@ -47,11 +53,15 @@ def compute_stats(analysis: Analysis) -> Dict[str, object]:
     ]
     summary_rows = section_total_rows if section_total_rows else leaf_rows
 
-    by_class = aggregate(summary_rows, lambda contribution: contribution.kind or section_class(contribution.section))
-    by_section = aggregate(summary_rows, lambda contribution: contribution.section)
-    by_object = aggregate(leaf_rows, lambda contribution: object_name(contribution.source))
-    by_archive = aggregate(leaf_rows, lambda contribution: archive_name(contribution.source))
-    by_source = aggregate(leaf_rows, lambda contribution: source_file(contribution.source))
+    by_class = aggregate(
+        summary_rows,
+        lambda contribution: contribution.kind or section_class(contribution.section, rules=active_rules),
+        rules=active_rules,
+    )
+    by_section = aggregate(summary_rows, lambda contribution: contribution.section, rules=active_rules)
+    by_object = aggregate(leaf_rows, lambda contribution: object_name(contribution.source), rules=active_rules)
+    by_archive = aggregate(leaf_rows, lambda contribution: archive_name(contribution.source), rules=active_rules)
+    by_source = aggregate(leaf_rows, lambda contribution: source_file(contribution.source), rules=active_rules)
     symbols = sorted(
         [contribution for contribution in all_contribs if contribution.symbol and contribution.size > 0],
         key=lambda contribution: contribution.size,
@@ -88,6 +98,7 @@ def build_module_rows(by_object: Iterable[Dict[str, object]]) -> List[Dict[str, 
 
 def to_jsonable(analysis: Analysis) -> Dict[str, object]:
     data = asdict(analysis)
+    data.pop("rules", None)
     stats = compute_stats(analysis)
     data["stats"] = {
         key: [asdict(item) if hasattr(item, "__dataclass_fields__") else item for item in value]

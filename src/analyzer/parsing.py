@@ -8,6 +8,7 @@ from .map_formats import PARSERS, get_parser
 from .map_formats.base import append_hint
 from .linker_formats import parse_linker_file
 from .models import Analysis
+from .section_rules import RulesConfig
 
 SUPPORTED_FORMATS = ("auto", "generic", "gnu", "arm", "keil", "iar", "ti", "msvc")
 
@@ -26,12 +27,14 @@ def parse_map(
     linker_file: Path | None = None,
     su_dir: Path | None = None,
     chip_config: Path | None = None,
+    rules: RulesConfig | None = None,
 ) -> Analysis:
     ext = path.suffix.lower()
     if ext in (".elf", ".axf", ".o"):
         from .elf_parser import parse_elf
         analysis = parse_elf(path, min_size=min_size)
-        return _post_process_analysis(analysis, linker_file, su_dir, chip_config)
+        analysis.rules = rules
+        return _post_process_analysis(analysis, linker_file, su_dir, chip_config, rules=rules)
 
     return parse_map_text(
         path.read_text(errors="replace"),
@@ -41,6 +44,7 @@ def parse_map(
         linker_file=linker_file,
         su_dir=su_dir,
         chip_config=chip_config,
+        rules=rules,
     )
 
 
@@ -52,6 +56,7 @@ def parse_map_text(
     linker_file: Path | None = None,
     su_dir: Path | None = None,
     chip_config: Path | None = None,
+    rules: RulesConfig | None = None,
 ) -> Analysis:
     lines = text.splitlines()
     requested_format = (map_format or "auto").lower()
@@ -62,15 +67,16 @@ def parse_map_text(
     analysis = Analysis(
         input_file=input_file,
         generated_at=datetime.now().isoformat(timespec="seconds"),
+        rules=rules,
     )
     analysis.format_hints.append(f"requested={requested_format}")
     analysis.format_hints.append(f"detected={detected_format}")
 
     for parser in _select_parsers(detected_format):
-        parser.parse(lines, analysis, min_size)
+        parser.parse(lines, analysis, min_size, rules=rules)
 
     append_hint(analysis, f"profile={detected_format}")
-    return _post_process_analysis(analysis, linker_file, su_dir, chip_config)
+    return _post_process_analysis(analysis, linker_file, su_dir, chip_config, rules=rules)
 
 
 def _post_process_analysis(
@@ -78,10 +84,13 @@ def _post_process_analysis(
     linker_file: Path | None = None,
     su_dir: Path | None = None,
     chip_config: Path | None = None,
+    rules: RulesConfig | None = None,
 ) -> Analysis:
+    active_rules = rules or analysis.rules
+    analysis.rules = active_rules
     if linker_file is not None:
         linker_path = Path(linker_file)
-        linker_format, linker_regions, linker_extras = parse_linker_file(linker_path)
+        linker_format, linker_regions, linker_extras = parse_linker_file(linker_path, rules=active_rules)
         append_hint(analysis, f"linker={linker_path.name}")
         append_hint(analysis, f"linker-profile={linker_format}")
         analysis.linker_name = linker_path.name
@@ -107,7 +116,7 @@ def _post_process_analysis(
     _compute_region_usage(analysis)
 
     from .validation import detect_layout_issues
-    val_warnings, _ = detect_layout_issues(analysis)
+    val_warnings, _ = detect_layout_issues(analysis, rules=active_rules)
     analysis.warnings.extend(val_warnings)
 
     if su_dir is not None:

@@ -17,6 +17,7 @@ Usage:
   python src/openmapfileanalyzer.py firmware.map --csv
   python src/openmapfileanalyzer.py firmware.map --top 100 --min-size 16
   python src/openmapfileanalyzer.py firmware.map --linker-file lscript.ld
+  python src/openmapfileanalyzer.py firmware.map --section-rules section_rules.yaml
   python src/openmapfileanalyzer.py firmware.map --format auto
   python src/openmapfileanalyzer.py firmware.map --format gnu
   python src/openmapfileanalyzer.py firmware.map --format keil
@@ -37,6 +38,7 @@ from typing import Optional, Sequence
 from version import __version__
 
 from analyzer import SUPPORTED_FORMATS, parse_map, render_html, to_jsonable
+from analyzer.section_rules import load_rules
 from analyzer.stats import build_module_rows, compute_stats
 from analyzer.utils import parse_byte_size
 
@@ -90,6 +92,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         type=Path,
         help="Optional YAML file defining chip memory regions (replaces map-derived regions)",
     )
+    ap.add_argument(
+        "--section-rules",
+        type=Path,
+        help="Optional YAML file overriding section, region, and module classification rules",
+    )
     args = ap.parse_args(argv)
 
     if not args.mapfile.exists():
@@ -104,11 +111,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if args.chip_config and not args.chip_config.exists():
         print(f"error: chip-config not found: {args.chip_config}", file=sys.stderr)
         return 2
+    if args.section_rules and not args.section_rules.exists():
+        print(f"error: section-rules file not found: {args.section_rules}", file=sys.stderr)
+        return 2
 
     is_markdown = args.markdown
     map_format = args.map_format
     out_suffix = ".md" if is_markdown else ".html"
     out = args.output or args.mapfile.with_suffix(out_suffix)
+    rules = load_rules(args.section_rules) if args.section_rules else None
 
     analysis = parse_map(
         args.mapfile,
@@ -117,8 +128,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         linker_file=args.linker_file,
         su_dir=args.su_dir,
         chip_config=args.chip_config,
+        rules=rules,
     )
-    stats = compute_stats(analysis)
+    stats = compute_stats(analysis, rules=rules)
 
     if is_markdown:
         from analyzer.report import render_markdown
@@ -126,6 +138,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             analysis,
             rom_capacity=args.rom_capacity,
             ram_capacity=args.ram_capacity,
+            rules=rules,
         )
         try:
             sys.stdout.reconfigure(encoding="utf-8")
@@ -138,6 +151,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             top=args.top,
             rom_capacity=args.rom_capacity,
             ram_capacity=args.ram_capacity,
+            rules=rules,
         )
 
     out.write_text(report_content, encoding="utf-8")

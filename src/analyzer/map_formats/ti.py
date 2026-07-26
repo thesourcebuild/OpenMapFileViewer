@@ -4,6 +4,7 @@ import re
 from typing import Sequence
 
 from ..models import Analysis, Contribution
+from ..section_rules import RulesConfig
 from ..utils import normalize_source, parse_int, section_class
 
 FORMAT_NAME = "ti"
@@ -23,7 +24,12 @@ def can_parse(text: str) -> bool:
     return "section allocation map" in sample and ("ti" in sample or "linker" in sample)
 
 
-def parse(lines: Sequence[str], analysis: Analysis, min_size: int = 0) -> None:
+def parse(
+    lines: Sequence[str],
+    analysis: Analysis,
+    min_size: int = 0,
+    rules: RulesConfig | None = None,
+) -> None:
     current_section = ""
 
     for line_no, line in enumerate(lines, 1):
@@ -42,7 +48,7 @@ def parse(lines: Sequence[str], analysis: Analysis, min_size: int = 0) -> None:
                 size = 0
             if size >= min_size and size > 0:
                 analysis.contributions.append(
-                    Contribution(section, addr, size, "<section total>", kind=section_class(section), line_no=line_no)
+                    Contribution(section, addr, size, "<section total>", kind=section_class(section, rules=rules), line_no=line_no)
                 )
                 current_section = section
             continue
@@ -62,7 +68,7 @@ def parse(lines: Sequence[str], analysis: Analysis, min_size: int = 0) -> None:
                         addr,
                         size,
                         normalize_source(match.group("source")),
-                        kind=section_class(current_section),
+                        kind=section_class(current_section, rules=rules),
                         line_no=line_no,
                     )
                 )

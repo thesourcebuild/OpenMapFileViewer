@@ -99,6 +99,7 @@ openmapfileanalyzer firmware.map --csv
 
 openmapfileanalyzer firmware.map --rom-capacity 2MiB --ram-capacity 512KiB
 openmapfileanalyzer firmware.map --rom-capacity 0x200000 --ram-capacity 0x80000
+openmapfileanalyzer firmware.map --section-rules samples/section_rules.yaml
 ```
 
 Or run directly from source:
@@ -132,17 +133,21 @@ openmapfileanalyzer firmware.map --map-format generic
 
 When you pass `--csv`, the tool writes a combined CSV export (replacing the input file's extension with `.csv`) with both the section breakdown and the module breakdown.
 
+When you pass `--json`, the tool writes a JSON summary file with the full parsed analysis and computed statistics.
+
+**Section Rules**: When you pass `--section-rules`, the analyzer loads a YAML file that extends the built-in section, memory-region, and module classification rules. A ready-to-edit example lives at `samples/section_rules.yaml`.
+
 ### Using the sample files
 
 The `samples/` directory contains pre-generated linker map files for various toolchains. You can use them to explore the report without your own firmware:
 
-| Toolchain | Target | Command |
-|-----------|--------|---------|
-| Keil | STM32F103RB | `openmapfileanalyzer "samples/keil/openlibcli_stm32f103rbtx.map" --linker-file "samples/keil/openlibcli_stm32f103rbtx.sct"` |
-| STM32CubeIDE | STM32F103RB | `openmapfileanalyzer "samples/gcc/cubeide/openlibcli_stm32f103rbtx.map" --linker-file "samples/gcc/cubeide/STM32F103RBTX_FLASH.ld"` |
-| IAR | STM32F103RB | `openmapfileanalyzer "samples/iar/openlibcli_stm32f103rbtx.map" --linker-file "samples/iar/stm32f103xb_flash.icf"` |
-| ESP32 (IDF) | ESP32 | `openmapfileanalyzer "samples/gcc/esp32/openlibcli_esp32.map"` |
-| Pico SDK | RP2350 | `openmapfileanalyzer "samples/gcc/pico/openlibcli_rp2350.map"` |
+| Toolchain | Target | Command | Source command |
+|-----------|--------|---------|---------------|
+| Keil | STM32F103RB | `openmapfileanalyzer "samples/keil/openlibcli_stm32f103rbtx.map" --linker-file "samples/keil/openlibcli_stm32f103rbtx.sct"` | `python src/openmapfileanalyzer.py "samples/keil/openlibcli_stm32f103rbtx.map" --linker-file "samples/keil/openlibcli_stm32f103rbtx.sct"` |
+| STM32CubeIDE | STM32F103RB | `openmapfileanalyzer "samples/gcc/cubeide/openlibcli_stm32f103rbtx.map" --linker-file "samples/gcc/cubeide/STM32F103RBTX_FLASH.ld"` | `python src/openmapfileanalyzer.py "samples/gcc/cubeide/openlibcli_stm32f103rbtx.map" --linker-file "samples/gcc/cubeide/STM32F103RBTX_FLASH.ld"` |
+| IAR | STM32F103RB | `openmapfileanalyzer "samples/iar/openlibcli_stm32f103rbtx.map" --linker-file "samples/iar/stm32f103xb_flash.icf"` | `python src/openmapfileanalyzer.py "samples/iar/openlibcli_stm32f103rbtx.map" --linker-file "samples/iar/stm32f103xb_flash.icf"` |
+| ESP32 (IDF) | ESP32 | `openmapfileanalyzer "samples/gcc/esp32/openlibcli_esp32.map"` | `python src/openmapfileanalyzer.py "samples/gcc/esp32/openlibcli_esp32.map"` |
+| Pico SDK | RP2350 | `openmapfileanalyzer "samples/gcc/pico/openlibcli_rp2350.map"` | `python src/openmapfileanalyzer.py "samples/gcc/pico/openlibcli_rp2350.map"` |
 
 Sample chip configuration YAML files are also available in `samples/chip-configs/`:
 

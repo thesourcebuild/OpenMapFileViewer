@@ -23,12 +23,13 @@ classifiers = [
 [project.optional-dependencies]
 build = ["pyinstaller>=6.0"]
 chip-config = ["PyYAML>=6.0"]
+section-rules = ["PyYAML>=6.0"]
 
 [project.scripts]
 openmapfileanalyzer = "openmapfileanalyzer:main"
 
 [tool.setuptools]
-py-modules = ["openmapfileanalyzer"]
+py-modules = ["openmapfileanalyzer", "version"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Protocol, Sequence
 
 from ..models import Analysis
+from ..section_rules import RulesConfig
 
 
 class FormatParser(Protocol):
@@ -12,7 +13,12 @@ class FormatParser(Protocol):
     def can_parse(text: str) -> bool:
         ...
 
-    def parse(lines: Sequence[str], analysis: Analysis, min_size: int = 0) -> None:
+    def parse(
+        lines: Sequence[str],
+        analysis: Analysis,
+        min_size: int = 0,
+        rules: RulesConfig | None = None,
+    ) -> None:
         ...
 
 

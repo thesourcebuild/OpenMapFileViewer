@@ -4,6 +4,7 @@ import re
 from typing import Sequence
 
 from ..models import Analysis, Contribution, MemoryRegion
+from ..section_rules import RulesConfig
 from ..utils import normalize_source, parse_int, section_class
 from .base import append_hint
 
@@ -41,7 +42,12 @@ def can_parse(text: str) -> bool:
     return "execution region" in sample or "load region" in sample or "image symbol table" in sample
 
 
-def parse(lines: Sequence[str], analysis: Analysis, min_size: int = 0) -> None:
+def parse(
+    lines: Sequence[str],
+    analysis: Analysis,
+    min_size: int = 0,
+    rules: RulesConfig | None = None,
+) -> None:
     current_region = ""
     saw_region_data = False
 
@@ -99,7 +105,7 @@ def parse(lines: Sequence[str], analysis: Analysis, min_size: int = 0) -> None:
             for section, size in values:
                 if size >= min_size and size > 0:
                     analysis.contributions.append(
-                        Contribution(section, None, size, match.group("object"), kind=section_class(section), line_no=line_no)
+                        Contribution(section, None, size, match.group("object"), kind=section_class(section, rules=rules), line_no=line_no)
                     )
             continue
 
@@ -114,7 +120,7 @@ def parse(lines: Sequence[str], analysis: Analysis, min_size: int = 0) -> None:
             for section, size in values:
                 if size >= min_size and size > 0:
                     analysis.contributions.append(
-                        Contribution(section, None, size, match.group("object"), kind=section_class(section), line_no=line_no)
+                        Contribution(section, None, size, match.group("object"), kind=section_class(section, rules=rules), line_no=line_no)
                     )
             continue
 
@@ -131,7 +137,7 @@ def parse(lines: Sequence[str], analysis: Analysis, min_size: int = 0) -> None:
             for section, size in values:
                 if size >= min_size and size > 0:
                     analysis.contributions.append(
-                        Contribution(section, None, size, name, kind=section_class(section), line_no=line_no)
+                        Contribution(section, None, size, name, kind=section_class(section, rules=rules), line_no=line_no)
                     )
 
     if saw_region_data:
