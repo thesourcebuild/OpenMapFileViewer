@@ -332,6 +332,8 @@ def render_html(
             )
         symbol_rows.append(row_s)
 
+    symbols_total_size = sum(int(row.get("total", 0) or 0) for row in symbol_rows)
+
     # --- Stack entries (sorted by max depth) ---
     stack_entries = (
         sorted(analysis.stack_usage, key=lambda e: e.max_depth, reverse=True)[:top]
@@ -478,6 +480,7 @@ def render_html(
         by_source=list(by_source)[:top],
         symbol_rows=symbol_rows,
         symbol_cols=symbol_cols,
+        symbols_total_size=symbols_total_size,
         has_stack=has_stack,
         stack_entries=stack_entries,
         cat_rows=cat_rows,
