@@ -337,6 +337,7 @@ main{padding:28px;max-width:1500px} .topline{display:flex;justify-content:space-
       <div class="export-container" data-export="Linker section breakdown">
       <h2>Linker section breakdown <button class="export-btn" onclick="exportContainer(this)" title="Export as PNG"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></h2>
       <p class="muted">One slice per linker section. Hover for byte count.</p>
+      <label class="filter-toggle" style="margin:0 0 12px;display:inline-flex"><input type="checkbox" id="donutHideDebug"> Hide debug</label>
       <canvas id="donutChart" class="chart-h420"></canvas>
       </div>
     </article>
@@ -1003,19 +1004,31 @@ function treemap(){
 function donutChart(){
   const c=document.getElementById('donutChart');if(!c)return;
   const [ctx,w,h]=prep(c);
-  const rows=(DATA.donut||[]).filter(r=>r.total>0);
+  const hideDebug=document.getElementById('donutHideDebug')?.checked||false;
+  const rows=(DATA.donut||[]).filter(r=>r.total>0&&(!hideDebug||!String(r.name||'').toLowerCase().includes('debug')));
   if(!rows.length){
     ctx.fillStyle='#94a3b8';ctx.font='14px Segoe UI';ctx.textAlign='center';
     ctx.fillText('No section data.',w/2,h/2);return;
   }
   const total=rows.reduce((s,r)=>s+r.total,0)||1;
-  const cx=w*0.42,cy=h/2;
-  const outerR=Math.min(cx,cy)*0.72;
+  const cy=h/2;
+  const legendW=Math.min(260,Math.max(180,Math.floor(w*0.32)));
+  const chartLeft=24;
+  const chartRight=Math.max(chartLeft+140,w-legendW-24);
+  const chartW=Math.max(140,chartRight-chartLeft);
+  const cx=chartLeft+chartW*0.44;
+  const outerR=Math.min(chartW*0.42,cy)*1.02;
   const innerR=outerR*0.52;
-  const legendX=w*0.72,legendStartY=h*0.12;
+  const legendX=chartRight+18,legendStartY=h*0.12;
   const legendRowH=22;
   let angle=-Math.PI/2;
   const slices=[];
+  const fitLabel=(text,maxWidth)=>{
+    if(ctx.measureText(text).width<=maxWidth)return text;
+    let out=text;
+    while(out.length>1&&ctx.measureText(out+'…').width>maxWidth)out=out.slice(0,-1);
+    return out+'…';
+  };
   rows.forEach((r,i)=>{
     const sweep=r.total/total*Math.PI*2;
     const col=COLORS[i%COLORS.length];
@@ -1046,7 +1059,8 @@ function donutChart(){
     const pctStr = pctVal < 0.01 && pctVal > 0 ? pctVal.toFixed(3) + '%' :
                    pctVal < 0.1 && pctVal > 0 ? pctVal.toFixed(2) + '%' :
                    pctVal.toFixed(1) + '%';
-    ctx.fillText(r.name.slice(0,18)+' '+pctStr,legendX+17,ly+1);
+    const label=fitLabel(r.name+' '+pctStr,Math.max(90,w-legendX-24));
+    ctx.fillText(label,legendX+17,ly+1);
   });
   c._donutSlices=slices;
 }
@@ -1154,6 +1168,8 @@ function redraw(){
 window.addEventListener('resize',redraw);
 redraw();
 initTooltips();
+const donutHideDebug=document.getElementById('donutHideDebug');
+if(donutHideDebug)donutHideDebug.addEventListener('change',donutChart);
 
 // ─── Table filter / sort / tab logic ─────────────────────────────────────────
 function updateSymbolsTotal(){
