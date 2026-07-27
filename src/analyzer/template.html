@@ -144,6 +144,7 @@ main{padding:28px;max-width:1500px} .topline{display:flex;justify-content:space-
 .layout-two{display:grid;grid-template-columns:1fr 1fr;gap:16px} .panel{padding:18px;margin:16px 0} .panel h2{font-size:18px;margin:0 0 14px;border-left:4px solid var(--accent);padding-left:10px} canvas{width:100%;display:block}
 .chart-h340{height:340px} .chart-h420{height:420px} .chart-h280{height:280px} .chart-h500{height:500px} .chart-h260{height:260px}
 .table-wrap{overflow:auto;max-height:min(72vh,760px)} table{width:100%;border-collapse:collapse;min-width:760px} th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap} th{background:#f2f5f9;color:#334155;position:sticky;top:0;z-index:1;cursor:pointer} td.name,th:nth-child(2),td:nth-child(2),th:first-child,td:first-child{text-align:left} tr:hover{background:#fafcff} .toolbar{margin:0 0 12px} .toolbar-summary{display:flex;justify-content:flex-end;margin:-6px 0 12px;color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums} input{border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:280px}
+.filter-controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;margin:0 0 12px;padding:10px;background:#f8fafc;border:1px solid var(--line);border-radius:12px}.filter-controls input[type=text]{min-width:280px}.filter-row{display:flex;flex:0 0 100%;flex-wrap:wrap;align-items:center;gap:8px 10px}.filter-field,.filter-toggle,.filter-chip{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:12px;font-weight:600}.filter-field input[type=number]{width:118px;min-width:0;padding:8px 10px}.filter-toggle input,.filter-chip input{min-width:0;margin:0;padding:0}.filter-chip{background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 8px}.filter-label{color:var(--muted);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}.filter-count{margin-left:auto;color:var(--muted);font-size:12px;white-space:nowrap}
 .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px} .tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 14px;cursor:pointer} .tab.active{background:#102a43;color:#fff;border-color:#102a43} .tabpane{display:none} .tabpane.active{display:block} .share{display:inline-block;width:84px;height:8px;background:#e8edf4;border-radius:999px;margin-right:8px;vertical-align:middle;overflow:hidden} .share i{display:block;height:100%;background:var(--accent)} .bar{display:inline-block;width:110px;height:8px;background:#e8edf4;border-radius:999px;overflow:hidden} .bar span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
 .linker-meta-grid{display:grid;grid-template-columns:160px 1fr;gap:6px 14px;margin:0 0 18px;font-size:13px} .linker-meta-grid dt{color:var(--muted);font-weight:600} .linker-meta-grid dd{margin:0} .linker-raw{background:#0d1117;color:#c9d1d9;border-radius:10px;padding:16px 18px;overflow:auto;max-height:420px;font:12px/1.6 'Cascadia Code','Fira Code','Consolas',monospace;white-space:pre;border:1px solid #30363d} .linker-regions-wrap{margin-bottom:18px}
 .tag{border-radius:999px;padding:3px 8px;font-size:12px;font-weight:700;background:#eef2f7;color:#334155} .tag0{background:#e0f2fe;color:#075985}.tag1{background:#dcfce7;color:#166534}.tag2{background:#fef3c7;color:#92400e}.tag3{background:#ede9fe;color:#5b21b6}.tag4{background:#fee2e2;color:#991b1b}.tag5{background:#ccfbf1;color:#115e59}.tag6{background:#fce7f3;color:#9d174d}.tag7{background:#f1f5f9;color:#475569}
@@ -351,7 +352,11 @@ main{padding:28px;max-width:1500px} .topline{display:flex;justify-content:space-
       <button class="tab" data-tab="ramtab">Top RAM</button>
       <button class="tab" data-tab="libtab">Libraries</button>
     </div>
-    <div class="toolbar"><input data-filter="moduleTable" placeholder="Filter modules or categories..."></div>
+    <div class="filter-controls" data-filter-scope="modules">
+      <input type="text" data-advanced-filter="modules" data-filter-kind="text" placeholder="Filter modules or categories...">
+      <label class="filter-field">Min total <input type="number" min="0" step="1" data-advanced-filter="modules" data-filter-kind="min-size" placeholder="bytes"></label>
+      <span id="modulesFilterCount" class="filter-count"></span>
+    </div>
     <div id="romtab"  class="tabpane module-tabpane active">{{ module_table(top_rom,   'moduleTable', total) }}</div>
     <div id="codetab" class="tabpane module-tabpane">{{ module_table(top_code,  'codeTable',   total) }}</div>
     <div id="ramtab"  class="tabpane module-tabpane">{{ module_table(top_ram,   'ramTable',    total) }}</div>
@@ -371,7 +376,18 @@ main{padding:28px;max-width:1500px} .topline{display:flex;justify-content:space-
   {# Detail tables #}
   <section id="details" class="panel">
     <h2>Section breakdown <span class="top-note">(top {{ top }})</span></h2>
-    <div class="toolbar"><input data-filter="sections" placeholder="Filter sections..."></div>
+    <div class="filter-controls" data-filter-scope="sections">
+      <input type="text" data-advanced-filter="sections" data-filter-kind="text" placeholder="Filter sections...">
+      <label class="filter-field">Min total <input type="number" min="0" step="1" data-advanced-filter="sections" data-filter-kind="min-size" placeholder="bytes"></label>
+      <label class="filter-toggle"><input type="checkbox" data-advanced-filter="sections" data-filter-kind="hide-debug"> Hide debug</label>
+      <span id="sectionsFilterCount" class="filter-count"></span>
+      <div class="filter-row">
+        <span class="filter-label">Class</span>
+        {% for cls, label in [('code','Code'), ('rodata','RO'), ('data','RW'), ('bss','BSS'), ('debug','Debug'), ('other','Other')] %}
+        <label class="filter-chip"><input type="checkbox" data-advanced-filter="sections" data-filter-kind="class" value="{{ cls }}" checked> {{ label }}</label>
+        {% endfor %}
+      </div>
+    </div>
     {{ render_table(by_section, columns_common, 'sections', show_rank=True) }}
   </section>
   <section class="panel">
@@ -381,7 +397,19 @@ main{padding:28px;max-width:1500px} .topline{display:flex;justify-content:space-
   </section>
   <section class="panel">
     <h2>Source-file estimate <span class="top-note">(top {{ top }})</span></h2>
-    <div class="toolbar"><input data-filter="sources" placeholder="Filter source estimates..."></div>
+    <div class="filter-controls" data-filter-scope="sources">
+      <input type="text" data-advanced-filter="sources" data-filter-kind="text" placeholder="Filter source estimates...">
+      <label class="filter-field">Min total <input type="number" min="0" step="1" data-advanced-filter="sources" data-filter-kind="min-size" placeholder="bytes"></label>
+      <label class="filter-toggle"><input type="checkbox" data-advanced-filter="sources" data-filter-kind="hide-generated"> Hide generated</label>
+      <label class="filter-toggle"><input type="checkbox" data-advanced-filter="sources" data-filter-kind="hide-library"> Hide libraries</label>
+      <span id="sourcesFilterCount" class="filter-count"></span>
+      <div class="filter-row">
+        <span class="filter-label">Ext</span>
+        {% for ext, label in [('c','.c'), ('cpp','.cpp'), ('h','.h'), ('s','.s/.asm'), ('other','Other')] %}
+        <label class="filter-chip"><input type="checkbox" data-advanced-filter="sources" data-filter-kind="extension" value="{{ ext }}" checked> {{ label }}</label>
+        {% endfor %}
+      </div>
+    </div>
     {{ render_table(by_source, columns_common, 'sources', show_rank=True) }}
   </section>
   <section class="panel">
@@ -1142,8 +1170,72 @@ function updateSymbolsTotal(){
   });
   el.textContent=fmt(total,2);
 }
+const CLASS_HEADER={code:'Code',rodata:'RO data',data:'RW data',bss:'ZI/BSS',debug:'Debug',other:'Other'};
+function tableHeaderIndex(table,label){return [...table.querySelectorAll('thead th')].findIndex(th=>th.textContent.trim()===label);}
+function rowValue(row,label){
+  const table=row.closest('table'),idx=table?tableHeaderIndex(table,label):-1,cell=idx>=0?row.cells[idx]:null;
+  return cell?parseInt(cell.dataset.sort||cell.dataset.bytes||'0',10)||0:0;
+}
+function rowName(row){const cell=row.querySelector('td.name')||row.cells[1]||row.cells[0];return cell?cell.textContent.trim():'';}
+function control(scope,kind){return document.querySelector(`[data-advanced-filter="${scope}"][data-filter-kind="${kind}"]`);}
+function checkedValues(scope,kind){return [...document.querySelectorAll(`[data-advanced-filter="${scope}"][data-filter-kind="${kind}"]:checked`)].map(el=>el.value);}
+function scopeTableIds(scope){return scope==='modules'?['moduleTable','codeTable','ramTable','libTable']:[scope];}
+function activeScopeTable(scope){
+  if(scope==='modules')return document.querySelector('#modules .module-tabpane.active table');
+  return document.getElementById(scope);
+}
+function updateFilterCount(scope){
+  const el=document.getElementById(scope+'FilterCount'),table=activeScopeTable(scope);
+  if(!el||!table)return;
+  const rows=[...table.querySelectorAll('tbody tr')],shown=rows.filter(r=>r.style.display!=='none').length;
+  el.textContent=`Showing ${shown} of ${rows.length}`;
+}
+function sourceKind(name){
+  const n=name.toLowerCase();
+  if(/\.c(?:$|[\s)])/i.test(n))return 'c';
+  if(/\.(cpp|cc|cxx)(?:$|[\s)])/i.test(n))return 'cpp';
+  if(/\.(h|hh|hpp|hxx)(?:$|[\s)])/i.test(n))return 'h';
+  if(/\.(s|asm)(?:$|[\s)])/i.test(n))return 's';
+  return 'other';
+}
+function isGeneratedSource(name){const n=name.toLowerCase();return n.startsWith('<')||n.includes('load address')||n.includes('generated')||n.includes('*fill*')||n.includes('linker');}
+function isLibrarySource(name){return /\.(a|lib)\(/i.test(name);}
+function applyAdvancedFilter(scope){
+  const text=(control(scope,'text')?.value||'').toLowerCase();
+  const min=parseInt(control(scope,'min-size')?.value||'0',10)||0;
+  const hideDebug=control(scope,'hide-debug')?.checked||false;
+  const hideGenerated=control(scope,'hide-generated')?.checked||false;
+  const hideLibrary=control(scope,'hide-library')?.checked||false;
+  const enabledClasses=checkedValues(scope,'class');
+  const enabledExts=checkedValues(scope,'extension');
+  scopeTableIds(scope).forEach(id=>{
+    const table=document.getElementById(id);if(!table)return;
+    table.querySelectorAll('tbody tr').forEach(row=>{
+      const name=rowName(row),nameLower=name.toLowerCase();
+      let show=true;
+      if(text&&!row.innerText.toLowerCase().includes(text))show=false;
+      if(show&&min&&rowValue(row,'Total')<min)show=false;
+      if(show&&scope==='sections'){
+        if(hideDebug&&(rowValue(row,'Debug')>0||nameLower.includes('debug')))show=false;
+        if(show)show=enabledClasses.length>0&&enabledClasses.some(cls=>rowValue(row,CLASS_HEADER[cls])>0);
+      }
+      if(show&&scope==='sources'){
+        show=enabledExts.length>0&&enabledExts.includes(sourceKind(name));
+        if(show&&hideGenerated&&isGeneratedSource(name))show=false;
+        if(show&&hideLibrary&&isLibrarySource(name))show=false;
+      }
+      row.style.display=show?'':'none';
+    });
+  });
+  updateFilterCount(scope);
+}
 function filterTable(id,q){q=(q||'').toLowerCase();document.querySelectorAll('#'+id+' tbody tr').forEach(r=>r.style.display=r.innerText.toLowerCase().includes(q)?'':'none');if(id==='symbols')updateSymbolsTotal();}
 document.querySelectorAll('input[data-filter]').forEach(inp=>inp.addEventListener('input',e=>filterTable(e.target.dataset.filter,e.target.value)));
+document.querySelectorAll('[data-advanced-filter]').forEach(inp=>{
+  const handler=e=>applyAdvancedFilter(e.target.dataset.advancedFilter);
+  inp.addEventListener('input',handler);inp.addEventListener('change',handler);
+});
+['modules','sections','sources'].forEach(applyAdvancedFilter);
 updateSymbolsTotal();
 // Module tabs (scoped to .module-tabs container)
 document.querySelectorAll('.module-tabs .tab').forEach(b=>b.addEventListener('click',()=>{
@@ -1152,6 +1244,7 @@ document.querySelectorAll('.module-tabs .tab').forEach(b=>b.addEventListener('cl
   section.querySelectorAll('.module-tabpane').forEach(x=>x.classList.remove('active'));
   b.classList.add('active');
   document.getElementById(b.dataset.tab).classList.add('active');
+  applyAdvancedFilter('modules');
 }));
 // Linker tabs (scoped to .linker-tabs container)
 document.querySelectorAll('.linker-tabs .tab').forEach(b=>b.addEventListener('click',()=>{
