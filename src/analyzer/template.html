@@ -29,7 +29,7 @@
 {# MACRO: generic sortable table (sections, archives, sources, symbols)#}
 {# cols = list of {key, label} dicts                                   #}
 {# ------------------------------------------------------------------ #}
-{% macro render_table(rows, cols, table_id) -%}
+{% macro render_table(rows, cols, table_id, show_rank=False) -%}
 {% if not rows %}
 <p class="muted">No data found.</p>
 {% else %}
@@ -38,9 +38,10 @@
   {%- if row.get('total', 0) > ns.max_total -%}{%- set ns.max_total = row.get('total', 0) -%}{%- endif -%}
 {%- endfor -%}
 <div class="table-wrap"><table id="{{ table_id }}">
-  <thead><tr>{% for col in cols %}<th>{{ col.label }}</th>{% endfor %}</tr></thead>
+  <thead><tr>{% if show_rank %}<th>#</th>{% endif %}{% for col in cols %}<th>{{ col.label }}</th>{% endfor %}</tr></thead>
   <tbody>
   {% for row in rows %}<tr>
+    {%- if show_rank -%}<td>{{ loop.index }}</td>{%- endif -%}
     {%- for col in cols -%}
     {%- set key   = col.key -%}
     {%- set value = row.get(key, 0) -%}
@@ -142,7 +143,7 @@ main{padding:28px;max-width:1500px} .topline{display:flex;justify-content:space-
 .capacity-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:18px 0} .capacity-card{padding:18px} .card-title{display:flex;align-items:center;gap:12px} .card-title h3{margin:0;font-size:17px;flex:1} .card-title strong{color:var(--accent)} .meter{height:12px;border-radius:999px;background:#eef2f7;overflow:hidden;margin:14px 0 8px} .meter i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent2))} .capacity-card p{margin:0 0 12px;color:var(--muted)} .capacity-card ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 18px;margin:0;padding:0;list-style:none} .capacity-card li{display:flex;justify-content:space-between;border-top:1px dashed var(--line);padding-top:7px}
 .layout-two{display:grid;grid-template-columns:1fr 1fr;gap:16px} .panel{padding:18px;margin:16px 0} .panel h2{font-size:18px;margin:0 0 14px;border-left:4px solid var(--accent);padding-left:10px} canvas{width:100%;display:block}
 .chart-h340{height:340px} .chart-h420{height:420px} .chart-h280{height:280px} .chart-h500{height:500px} .chart-h260{height:260px}
-.table-wrap{overflow:auto} table{width:100%;border-collapse:collapse;min-width:760px} th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap} th{background:#f2f5f9;color:#334155;position:sticky;top:0;cursor:pointer} td.name,th:nth-child(2),td:nth-child(2),th:first-child,td:first-child{text-align:left} tr:hover{background:#fafcff} .toolbar{margin:0 0 12px} input{border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:280px}
+.table-wrap{overflow:auto;max-height:min(72vh,760px)} table{width:100%;border-collapse:collapse;min-width:760px} th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap} th{background:#f2f5f9;color:#334155;position:sticky;top:0;z-index:1;cursor:pointer} td.name,th:nth-child(2),td:nth-child(2),th:first-child,td:first-child{text-align:left} tr:hover{background:#fafcff} .toolbar{margin:0 0 12px} input{border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:280px}
 .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px} .tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 14px;cursor:pointer} .tab.active{background:#102a43;color:#fff;border-color:#102a43} .tabpane{display:none} .tabpane.active{display:block} .share{display:inline-block;width:84px;height:8px;background:#e8edf4;border-radius:999px;margin-right:8px;vertical-align:middle;overflow:hidden} .share i{display:block;height:100%;background:var(--accent)} .bar{display:inline-block;width:110px;height:8px;background:#e8edf4;border-radius:999px;overflow:hidden} .bar span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
 .linker-meta-grid{display:grid;grid-template-columns:160px 1fr;gap:6px 14px;margin:0 0 18px;font-size:13px} .linker-meta-grid dt{color:var(--muted);font-weight:600} .linker-meta-grid dd{margin:0} .linker-raw{background:#0d1117;color:#c9d1d9;border-radius:10px;padding:16px 18px;overflow:auto;max-height:420px;font:12px/1.6 'Cascadia Code','Fira Code','Consolas',monospace;white-space:pre;border:1px solid #30363d} .linker-regions-wrap{margin-bottom:18px}
 .tag{border-radius:999px;padding:3px 8px;font-size:12px;font-weight:700;background:#eef2f7;color:#334155} .tag0{background:#e0f2fe;color:#075985}.tag1{background:#dcfce7;color:#166534}.tag2{background:#fef3c7;color:#92400e}.tag3{background:#ede9fe;color:#5b21b6}.tag4{background:#fee2e2;color:#991b1b}.tag5{background:#ccfbf1;color:#115e59}.tag6{background:#fce7f3;color:#9d174d}.tag7{background:#f1f5f9;color:#475569}
@@ -371,7 +372,7 @@ main{padding:28px;max-width:1500px} .topline{display:flex;justify-content:space-
   <section id="details" class="panel">
     <h2>Section breakdown <span class="top-note">(top {{ top }})</span></h2>
     <div class="toolbar"><input data-filter="sections" placeholder="Filter sections..."></div>
-    {{ render_table(by_section, columns_common, 'sections') }}
+    {{ render_table(by_section, columns_common, 'sections', show_rank=True) }}
   </section>
   <section class="panel">
     <h2>Archive / library breakdown <span class="top-note">(top {{ top }})</span></h2>
@@ -381,13 +382,13 @@ main{padding:28px;max-width:1500px} .topline{display:flex;justify-content:space-
   <section class="panel">
     <h2>Source-file estimate <span class="top-note">(top {{ top }})</span></h2>
     <div class="toolbar"><input data-filter="sources" placeholder="Filter source estimates..."></div>
-    {{ render_table(by_source, columns_common, 'sources') }}
+    {{ render_table(by_source, columns_common, 'sources', show_rank=True) }}
   </section>
   <section class="panel">
     <h2>Variables & Functions <span class="top-note">(top {{ top }})</span></h2>
     <p class="muted">Shown when the map file contains symbol-size information.</p>
     <div class="toolbar"><input data-filter="symbols" placeholder="Filter symbols..."></div>
-    {{ render_table(symbol_rows, symbol_cols, 'symbols') }}
+    {{ render_table(symbol_rows, symbol_cols, 'symbols', show_rank=True) }}
   </section>
 
   {# Linker Script Info (only when --linker was passed) #}
