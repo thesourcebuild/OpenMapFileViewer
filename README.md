@@ -12,7 +12,8 @@ A standalone Python utility for firmware memory analysis. It parses linker map f
   - [Installation](#installation)
     - [Prerequisites](#prerequisites)
     - [Project Setup (Virtual Environment)](#project-setup-virtual-environment)
-    - [Install the Package](#install-the-package)
+      - [Activate](#activate)
+      - [Install the Package](#install-the-package)
   - [Usage](#usage)
     - [Running from Source](#running-from-source)
     - [Using the Installed Module](#using-the-installed-module)
@@ -95,7 +96,7 @@ When the linker map does not expose the capacity you want to use for the dashboa
 python -m venv .venv
 ```
 
-Activate:
+#### Activate
 
 Windows:
 
@@ -109,7 +110,7 @@ Linux/macOS:
 source .venv/bin/activate
 ```
 
-### Install the Package
+#### Install the Package
 
 ```bash
 pip install -e .
