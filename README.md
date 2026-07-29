@@ -9,10 +9,26 @@ A standalone Python utility for firmware memory analysis. It parses linker map f
   - [Report sections](#report-sections)
   - [Screenshots](#screenshots)
   - [Notes](#notes)
-  - [Project setup](#project-setup)
+  - [Installation](#installation)
+    - [Prerequisites](#prerequisites)
+    - [Project Setup (Virtual Environment)](#project-setup-virtual-environment)
+    - [Install the Package](#install-the-package)
   - [Usage](#usage)
+    - [Running from Source](#running-from-source)
+    - [Using the Installed Module](#using-the-installed-module)
+    - [Using the Standalone Executable](#using-the-standalone-executable)
+      - [Building the Standalone Executable](#building-the-standalone-executable)
+      - [Windows](#windows)
+      - [Linux/macOS](#linuxmacos)
+    - [Common Options](#common-options)
+      - [Parser Selection](#parser-selection)
+      - [Binary ELF Files](#binary-elf-files)
+      - [Linker Scripts](#linker-scripts)
+      - [CSV Export](#csv-export)
+      - [JSON Export](#json-export)
+      - [Section Rules](#section-rules)
     - [Using the sample files](#using-the-sample-files)
-  - [Standalone Executable](#standalone-executable)
+    - [Using Chip Configuration Files](#using-chip-configuration-files)
   - [Contributions](#contributions)
   - [License](#license)
   - [Author](#author)
@@ -66,100 +82,70 @@ Map files are not standardized. The parser uses best-effort format profiles and 
 
 When the linker map does not expose the capacity you want to use for the dashboard, pass it explicitly with `--rom-capacity` and `--ram-capacity`. Values accept raw bytes, hex, or `KiB`/`MiB`/`GiB` style suffixes.
 
-## Project setup
+## Installation
 
-It is recommended to run the project inside a virtual environment:
+### Prerequisites
+
+- Python 3.10+
+- pip
+
+### Project Setup (Virtual Environment)
 
 ```bash
-# 1. Create a virtual environment
 python -m venv .venv
+```
 
-# 2. Activate it
-# Windows:
+Activate:
+
+Windows:
+
+```bash
 .venv\Scripts\activate
-# Linux/macOS:
-source .venv/bin/activate
+```
 
-# 3. Install in editable mode
+Linux/macOS:
+
+```bash
+source .venv/bin/activate
+```
+
+### Install the Package
+
+```bash
 pip install -e .
 ```
 
 ## Usage
 
+### Running from Source
+
+Run directly from source:
+
+```bash
+python src/openmapfileviewer firmware.map -o firmware_report.html
+python src/openmapfileviewer firmware.map --linker-file lscript.ld
+python src/openmapfileviewer firmware.elf -o firmware_report.html
+
+python src/openmapfileviewer firmware.map --markdown
+python src/openmapfileviewer firmware.map --json firmware_report.json
+python src/openmapfileviewer firmware.map --csv
+
+python src/openmapfileviewer firmware.map --rom-capacity 2MiB --ram-capacity 512KiB
+python src/openmapfileviewer firmware.map --rom-capacity 0x200000 --ram-capacity 0x80000
+python src/openmapfileviewer firmware.map --section-rules samples/section_rules.yaml
+```
+
+### Using the Installed Module
+
 After installing with `pip install -e .`, run the analyzer as:
 
 ```bash
 openmapfileviewer firmware.map -o firmware_report.html
-openmapfileviewer firmware.map --linker-file lscript.ld
-openmapfileviewer firmware.elf -o firmware_report.html
-
-openmapfileviewer firmware.map --markdown
-openmapfileviewer firmware.map --json firmware_report.json
-openmapfileviewer firmware.map --csv
-
-openmapfileviewer firmware.map --rom-capacity 2MiB --ram-capacity 512KiB
-openmapfileviewer firmware.map --rom-capacity 0x200000 --ram-capacity 0x80000
-openmapfileviewer firmware.map --section-rules samples/section_rules.yaml
 ```
 
-Or run directly from source:
+### Using the Standalone Executable
 
-```bash
-python src/openmapfileviewer.py firmware.map -o firmware_report.html
-```
-
-Parser profile selection is optional:
-
-```bash
-openmapfileviewer firmware.map --map-format auto
-openmapfileviewer firmware.map --map-format gnu
-openmapfileviewer firmware.map --map-format keil
-openmapfileviewer firmware.map --map-format arm
-openmapfileviewer firmware.map --map-format iar
-openmapfileviewer firmware.map --map-format ti
-openmapfileviewer firmware.map --map-format msvc
-openmapfileviewer firmware.map --map-format generic
-```
-
-**Binary ELF Files**: You can pass binary ELF files (`.elf`, `.axf`, `.o`) directly instead of text map files. The analyzer leverages `pyelftools` to parse the `.symtab` section and extract `STT_FILE`, `STT_FUNC`, and `STT_OBJECT` symbol sizes natively without relying on map text layout.
-
-**Linker Scripts**: When you pass `--linker-file`, the analyzer reads memory regions from the linker file instead of relying only on the map output. Supported linker-file extensions are:
-
-- `.ld` for GNU ld / GCC / Clang linker scripts (e.g. `lscript.ld`)
-- `.sct` for Keil scatter files
-- `.icf` for IAR linker configuration files
-
-**Stack Usage**: When you pass `--su-dir`, the tool will recursively search for `.su` and `.ci` files in that directory to calculate per-function static stack usage and estimated max call-depth.
-
-When you pass `--csv`, the tool writes a combined CSV export (replacing the input file's extension with `.csv`) with both the section breakdown and the module breakdown.
-
-When you pass `--json`, the tool writes a JSON summary file with the full parsed analysis and computed statistics.
-
-**Section Rules**: When you pass `--section-rules`, the analyzer loads a YAML file that extends the built-in section, memory-region, and module classification rules. A ready-to-edit example lives at `samples/section_rules.yaml`.
-
-### Using the sample files
-
-The `samples/` directory contains pre-generated linker map files for various toolchains. You can use them to explore the report without your own firmware:
-
-| Toolchain | Target | Command | Source command |
-|-----------|--------|---------|---------------|
-| Keil | STM32F103RB | `openmapfileviewer "samples/keil/openlibcli_stm32f103rbtx.map" --linker-file "samples/keil/openlibcli_stm32f103rbtx.sct"` | `python src/openmapfileviewer.py "samples/keil/openlibcli_stm32f103rbtx.map" --linker-file "samples/keil/openlibcli_stm32f103rbtx.sct"` |
-| STM32CubeIDE | STM32F103RB | `openmapfileviewer "samples/gcc/cubeide/openlibcli_stm32f103rbtx.map" --linker-file "samples/gcc/cubeide/STM32F103RBTX_FLASH.ld"` | `python src/openmapfileviewer.py "samples/gcc/cubeide/openlibcli_stm32f103rbtx.map" --linker-file "samples/gcc/cubeide/STM32F103RBTX_FLASH.ld"` |
-| IAR | STM32F103RB | `openmapfileviewer "samples/iar/openlibcli_stm32f103rbtx.map" --linker-file "samples/iar/stm32f103xb_flash.icf"` | `python src/openmapfileviewer.py "samples/iar/openlibcli_stm32f103rbtx.map" --linker-file "samples/iar/stm32f103xb_flash.icf"` |
-| ESP32 (IDF) | ESP32 | `openmapfileviewer "samples/gcc/esp32/openlibcli_esp32.map"` | `python src/openmapfileviewer.py "samples/gcc/esp32/openlibcli_esp32.map"` |
-| Pico SDK | RP2350 | `openmapfileviewer "samples/gcc/pico/openlibcli_rp2350.map"` | `python src/openmapfileviewer.py "samples/gcc/pico/openlibcli_rp2350.map"` |
-
-Sample chip configuration YAML files are also available in `samples/chip-configs/`:
-
-```
-openmapfileviewer <map_file> --chip-config samples/chip-configs/stm32f103.yaml
-openmapfileviewer <map_file> --chip-config samples/chip-configs/esp32.yaml
-openmapfileviewer <map_file> --chip-config samples/chip-configs/zynq.yaml
-```
-
-Chip config samples demonstrate three supported YAML schemas (see [Docs/chip_config_yaml.md](Docs/chip_config_yaml.md) for details).
-
-## Standalone Executable
+#### Building the Standalone Executable
 
 If you wish to distribute the analyzer as a standalone executable without relying on a Python environment, you can use PyInstaller:
 
@@ -175,6 +161,96 @@ If you wish to distribute the analyzer as a standalone executable without relyin
    ```
 
 3. The executable will be generated in `out/pyinstaller/dist/openmapfileviewer.exe` (or `openmapfileviewer` on Linux/macOS).
+
+Once the executable is built, you can run it directly without installing Python or the package.
+
+#### Windows
+
+```bash
+out\pyinstaller\dist\openmapfileviewer.exe firmware.map -o firmware_report.html
+```
+
+#### Linux/macOS
+
+```bash
+./out/pyinstaller/dist/openmapfileviewer firmware.map -o firmware_report.html
+
+```
+
+If the executable is in your system `PATH`, simply run:
+
+```bash
+openmapfileviewer firmware.map -o firmware_report.html
+```
+
+### Common Options
+
+#### Parser Selection
+
+Parser profile selection is optional:
+
+```bash
+openmapfileviewer firmware.map --map-format auto
+openmapfileviewer firmware.map --map-format gnu
+openmapfileviewer firmware.map --map-format keil
+openmapfileviewer firmware.map --map-format arm
+openmapfileviewer firmware.map --map-format iar
+openmapfileviewer firmware.map --map-format ti
+openmapfileviewer firmware.map --map-format msvc
+openmapfileviewer firmware.map --map-format generic
+```
+
+#### Binary ELF Files
+
+**Binary ELF Files**: You can pass binary ELF files (`.elf`, `.axf`, `.o`) directly instead of text map files. The analyzer leverages `pyelftools` to parse the `.symtab` section and extract `STT_FILE`, `STT_FUNC`, and `STT_OBJECT` symbol sizes natively without relying on map text layout.
+
+#### Linker Scripts
+
+**Linker Scripts**: When you pass `--linker-file`, the analyzer reads memory regions from the linker file instead of relying only on the map output. Supported linker-file extensions are:
+
+- `.ld` for GNU ld / GCC / Clang linker scripts (e.g. `lscript.ld`)
+- `.sct` for Keil scatter files
+- `.icf` for IAR linker configuration files
+
+**Stack Usage**: When you pass `--su-dir`, the tool will recursively search for `.su` and `.ci` files in that directory to calculate per-function static stack usage and estimated max call-depth.
+
+#### CSV Export
+
+When you pass `--csv`, the tool writes a combined CSV export (replacing the input file's extension with `.csv`) with both the section breakdown and the module breakdown.
+
+#### JSON Export
+
+When you pass `--json`, the tool writes a JSON summary file with the full parsed analysis and computed statistics.
+
+#### Section Rules
+
+**Section Rules**: When you pass `--section-rules`, the analyzer loads a YAML file that extends the built-in section, memory-region, and module classification rules. A ready-to-edit example lives at `samples/section_rules.yaml`.
+
+### Using the sample files
+
+The `samples/` directory contains pre-generated linker map files for various toolchains. You can use them to explore the report without your own firmware:
+
+| Toolchain | Target | Command | Source command |
+|-----------|--------|---------|---------------|
+| Keil | STM32F103RB | `openmapfileviewer "samples/keil/openlibcli_stm32f103rbtx.map" --linker-file "samples/keil/openlibcli_stm32f103rbtx.sct"` | `python src/openmapfileviewer.py "samples/keil/openlibcli_stm32f103rbtx.map" --linker-file "samples/keil/openlibcli_stm32f103rbtx.sct"` |
+| STM32CubeIDE | STM32F103RB | `openmapfileviewer "samples/gcc/cubeide/openlibcli_stm32f103rbtx.map" --linker-file "samples/gcc/cubeide/STM32F103RBTX_FLASH.ld"` | `python src/openmapfileviewer.py "samples/gcc/cubeide/openlibcli_stm32f103rbtx.map" --linker-file "samples/gcc/cubeide/STM32F103RBTX_FLASH.ld"` |
+| IAR | STM32F103RB | `openmapfileviewer "samples/iar/openlibcli_stm32f103rbtx.map" --linker-file "samples/iar/stm32f103xb_flash.icf"` | `python src/openmapfileviewer.py "samples/iar/openlibcli_stm32f103rbtx.map" --linker-file "samples/iar/stm32f103xb_flash.icf"` |
+| ESP32 (IDF) | ESP32 | `openmapfileviewer "samples/gcc/esp32/openlibcli_esp32.map"` | `python src/openmapfileviewer.py "samples/gcc/esp32/openlibcli_esp32.map"` |
+| Pico SDK | RP2350 | `openmapfileviewer "samples/gcc/pico/openlibcli_rp2350.map"` | `python src/openmapfileviewer.py "samples/gcc/pico/openlibcli_rp2350.map"` |
+
+### Using Chip Configuration Files
+
+Chip configuration files provide hardware-specific memory information that may not be available in the linker map or linker script. They enable accurate memory capacities, region layouts, and utilization calculations for supported devices. Use --chip-config to generate more precise and consistent reports across different toolchains and targets.
+
+Sample chip configuration YAML files are also available in `samples/chip-configs/`:
+
+```
+openmapfileviewer <map_file> --chip-config samples/chip-configs/stm32f103.yaml
+openmapfileviewer <map_file> --chip-config samples/chip-configs/esp32.yaml
+openmapfileviewer <map_file> --chip-config samples/chip-configs/zynq.yaml
+```
+
+Chip config samples demonstrate three supported YAML schemas (see [Docs/chip_config_yaml.md](Docs/chip_config_yaml.md) for details).
 
 ## Contributions
 
