@@ -26,7 +26,7 @@ A standalone Python utility for firmware memory analysis. It parses linker map f
       - [Linker Scripts](#linker-scripts)
       - [CSV Export](#csv-export)
       - [JSON Export](#json-export)
-      - [Section Rules](#section-rules)
+      - [Extending Section Rules](#extending-section-rules)
     - [Using the sample files](#using-the-sample-files)
     - [Using Chip Configuration Files](#using-chip-configuration-files)
   - [Contributions](#contributions)
@@ -222,7 +222,7 @@ When you pass `--csv`, the tool writes a combined CSV export (replacing the inpu
 
 When you pass `--json`, the tool writes a JSON summary file with the full parsed analysis and computed statistics.
 
-#### Section Rules
+#### Extending Section Rules
 
 **Section Rules**: When you pass `--section-rules`, the analyzer loads a YAML file that extends the built-in section, memory-region, and module classification rules. A ready-to-edit example lives at `samples/section_rules.yaml`.
 
